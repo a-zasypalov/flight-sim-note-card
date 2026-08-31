@@ -56,7 +56,7 @@
 \newlength{\cutX}
 \newlength{\cutTop}
 
-\setlength{\cardW}{\dimexpr(\paperwidth-14mm)/2\relax}
+\setlength{\cardW}{\dimexpr(\paperwidth-20mm)/2\relax}
 \setlength{\cardH}{\dimexpr\paperheight-10mm\relax}
 \setlength{\innerW}{\dimexpr\cardW-8mm\relax}
 \setlength{\headerW}{\dimexpr\cardW-51mm\relax}
@@ -96,9 +96,9 @@
 \setlength{\arrRwyStart}{\dimexpr4mm+\arrAtisFreq+\arrQnh+\arrTransition\relax}
 \setlength{\arrStarStart}{\dimexpr4mm+\arrAtisFreq+\arrQnh+\arrTransition+\arrRwy\relax}
 \setlength{\taxiStandStart}{\dimexpr\cardW-4mm-\taxiStandW\relax}
-\setlength{\rightX}{\dimexpr5mm+\cardW+4mm\relax}
-\setlength{\cutX}{\dimexpr5mm+\cardW+2mm\relax}
-\setlength{\cutTop}{\dimexpr\paperheight-3mm\relax}
+\setlength{\rightX}{\dimexpr\paperwidth/2+5mm\relax}
+\setlength{\cutX}{\dimexpr\paperwidth/2\relax}
+\setlength{\cutTop}{\dimexpr\paperheight-0.5mm\relax}
 
 \newcommand{\Field}[5]{%
   \coordinate (fieldbase) at (#1,#2);
@@ -181,9 +181,7 @@
       \DrawCard{5mm}{5mm}
       \DrawCard{\rightX}{5mm}
       \draw[color=muted, line width=.35pt, dash pattern=on 1mm off 1.5mm]
-        (\cutX,1mm) -- (\cutX,\cutTop);
-      \node[anchor=south, font=\bfseries\fontsize{4.5}{5}\selectfont, text=muted]
-        at (\cutX,\cutTop) {CUT};
+        (\cutX,0.5mm) -- (\cutX,\cutTop);
     \end{tikzpicture}%
   }%
 }
