@@ -21,15 +21,9 @@
 \newlength{\depRwy}
 \newlength{\depQnh}
 \newlength{\depSqwk}
-\newlength{\depInitAlt}
-\newlength{\depSid}
-\newlength{\depTransAlt}
 \newlength{\depRwyStart}
 \newlength{\depQnhStart}
 \newlength{\depSqwkStart}
-\newlength{\depInitAltStart}
-\newlength{\depSidStart}
-\newlength{\depTransAltStart}
 \newlength{\arrAtisFreq}
 \newlength{\arrAtisSlashX}
 \newlength{\arrRwy}
@@ -48,8 +42,8 @@
 \setlength{\cardH}{#2}
 \setlength{\innerW}{\dimexpr\cardW-8mm\relax}
 \setlength{\headerW}{\dimexpr\cardW-51mm\relax}
-\setlength{\headerCall}{.40\headerW}
-\setlength{\headerAircraft}{.34\headerW}
+\setlength{\headerCall}{.35\headerW}
+\setlength{\headerAircraft}{.35\headerW}
 \setlength{\headerDate}{\dimexpr\headerW-\headerCall-\headerAircraft\relax}
 \setlength{\headerAircraftStart}{\dimexpr47mm+\headerCall\relax}
 \setlength{\headerDateStart}{\dimexpr47mm+\headerCall+\headerAircraft\relax}
@@ -59,20 +53,14 @@
 \setlength{\originDestStart}{\dimexpr4mm+\taxiStandW\relax}
 \setlength{\originDestW}{\dimexpr\altnStart-\originDestStart\relax}
 \setlength{\routeSlashX}{\dimexpr\originDestStart+.5\originDestW\relax}
-\setlength{\depAtisFreq}{.2\innerW}
+\setlength{\depAtisFreq}{.25\innerW}
 \setlength{\depAtisSlashX}{\dimexpr4mm+.72\depAtisFreq\relax}
-\setlength{\depRwy}{.1\innerW}
-\setlength{\depQnh}{.12\innerW}
-\setlength{\depSqwk}{.12\innerW}
-\setlength{\depInitAlt}{.12\innerW}
-\setlength{\depTransAlt}{.12\innerW}
-\setlength{\depSid}{\dimexpr\innerW-\depAtisFreq-\depSqwk-\depQnh-\depRwy-\depInitAlt-\depTransAlt\relax}
-\setlength{\depSqwkStart}{\dimexpr4mm+\depAtisFreq\relax}
-\setlength{\depQnhStart}{\dimexpr4mm+\depAtisFreq+\depSqwk\relax}
-\setlength{\depRwyStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh\relax}
-\setlength{\depSidStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy\relax}
-\setlength{\depInitAltStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy+\depSid\relax}
-\setlength{\depTransAltStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy+\depSid+\depInitAlt\relax}
+\setlength{\depQnh}{.18\innerW}
+\setlength{\depSqwk}{.18\innerW}
+\setlength{\depRwy}{\dimexpr\innerW-\depAtisFreq-.2\innerW-\depSqwk-\depQnh\relax}
+\setlength{\depQnhStart}{\dimexpr4mm+\depAtisFreq\relax}
+\setlength{\depSqwkStart}{\dimexpr4mm+\depAtisFreq+\depQnh+.2\innerW\relax}
+\setlength{\depRwyStart}{\dimexpr4mm+\depAtisFreq+.2\innerW+\depSqwk+\depQnh\relax}
 \setlength{\arrAtisFreq}{.21\innerW}
 \setlength{\arrAtisSlashX}{\dimexpr4mm+.72\arrAtisFreq\relax}
 \setlength{\arrQnh}{.10\innerW}
@@ -120,26 +108,27 @@
       at (\routeSlashX,179mm) {/};
 
     \Band{172mm}{DEPARTURE}
-    \Field{4mm}{160mm}{\depAtisFreq}{12mm}{ATIS FREQ / CODE}
+    \Field{4mm}{162mm}{\depAtisFreq}{10mm}{ATIS FREQ / INFO}
     \node[anchor=center, fill=white, inner sep=.45mm,
       font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
-      at (\depAtisSlashX,162mm) {/};
-    \Field{\depSqwkStart}{160mm}{\depSqwk}{12mm}{SQWK}
-    \Field{\depQnhStart}{160mm}{\depQnh}{12mm}{QNH}
-    \Field{\depRwyStart}{160mm}{\depRwy}{12mm}{RWY}
-    \Field{\depSidStart}{160mm}{\depSid}{12mm}{SID}
-    \Field{\depInitAltStart}{160mm}{\depInitAlt}{12mm}{INIT CLB}
-    \Field{\depTransAltStart}{160mm}{\depTransAlt}{12mm}{TRANS ALT}
-    \Field{4mm}{148mm}{.25\innerW}{12mm}{DEL FREQ}
-    \Field{\dimexpr4mm+.25\innerW\relax}{148mm}{.25\innerW}{12mm}{GND FREQ}
-    \Field{\dimexpr4mm+.50\innerW\relax}{148mm}{.25\innerW}{12mm}{TWR FREQ}
-    \Field{\dimexpr4mm+.75\innerW\relax}{148mm}{\dimexpr.25\innerW\relax}{12mm}{DEP FREQ}
-    \Notes{4mm}{129mm}{\innerW}{19mm}{PUSHBACK / TAXI}
-    \foreach \y in {135,141}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+      at (\depAtisSlashX,164mm) {/};
+    \Field{\depQnhStart}{162mm}{\depQnh}{10mm}{QNH}
+    \Field{\dimexpr4mm+\depAtisFreq+\depQnh\relax}{162mm}{.2\innerW}{10mm}{DEL FREQ}
+    \Field{\depSqwkStart}{162mm}{\depSqwk}{10mm}{SQWK}
+    \Field{\depRwyStart}{162mm}{\depRwy}{10mm}{RWY}
+    \Field{4mm}{152mm}{.25\innerW}{10mm}{SID}
+    \Field{\dimexpr4mm+.25\innerW\relax}{152mm}{.25\innerW}{10mm}{INIT CLB}
+    \Field{\dimexpr4mm+.50\innerW\relax}{152mm}{.25\innerW}{10mm}{TRANS ALT}
+    \Field{\dimexpr4mm+.75\innerW\relax}{152mm}{\dimexpr.25\innerW\relax}{10mm}{CRZ ALT}
+    \Field{4mm}{142mm}{.3333\innerW}{10mm}{GND FREQ}
+    \Field{\dimexpr4mm+.3333\innerW\relax}{142mm}{.3333\innerW}{10mm}{TWR FREQ}
+    \Field{\dimexpr4mm+.6666\innerW\relax}{142mm}{\dimexpr.3334\innerW\relax}{10mm}{DEP FREQ}
+    \Notes{4mm}{123mm}{\innerW}{19mm}{PUSHBACK / TAXI}
+    \foreach \y in {129,135}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
 
-    \Band{124mm}{IN-FLIGHT}
-    \Notes{4mm}{50mm}{\innerW}{74mm}{}
-    \foreach \y in {56,62,68,74,80,86,92,98,104,110,116}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+    \Band{118mm}{IN-FLIGHT}
+    \Notes{4mm}{50mm}{\innerW}{68mm}{}
+    \foreach \y in {56,62,68,74,80,86,92,98,104,110}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
 
     \Band{45mm}{ARRIVAL}
     \Field{4mm}{34mm}{\arrAtisFreq}{11mm}{ATIS FREQ / CODE}
