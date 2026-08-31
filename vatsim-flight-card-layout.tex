@@ -1,0 +1,161 @@
+\definecolor{ink}{gray}{0.16}
+\definecolor{muted}{gray}{0.52}
+\definecolor{band}{gray}{0.92}
+
+\newlength{\cardW}
+\newlength{\cardH}
+\newlength{\innerW}
+\newlength{\headerW}
+\newlength{\headerCall}
+\newlength{\headerAircraft}
+\newlength{\headerDate}
+\newlength{\headerAircraftStart}
+\newlength{\headerDateStart}
+\newlength{\originDestStart}
+\newlength{\originDestW}
+\newlength{\altnW}
+\newlength{\altnStart}
+\newlength{\routeSlashX}
+\newlength{\depAtisFreq}
+\newlength{\depAtisSlashX}
+\newlength{\depRwy}
+\newlength{\depQnh}
+\newlength{\depSqwk}
+\newlength{\depInitAlt}
+\newlength{\depSid}
+\newlength{\depTransAlt}
+\newlength{\depRwyStart}
+\newlength{\depQnhStart}
+\newlength{\depSqwkStart}
+\newlength{\depInitAltStart}
+\newlength{\depSidStart}
+\newlength{\depTransAltStart}
+\newlength{\arrAtisFreq}
+\newlength{\arrAtisSlashX}
+\newlength{\arrRwy}
+\newlength{\arrQnh}
+\newlength{\arrTransition}
+\newlength{\arrStar}
+\newlength{\arrRwyStart}
+\newlength{\arrQnhStart}
+\newlength{\arrTransitionStart}
+\newlength{\arrStarStart}
+\newlength{\taxiStandW}
+\newlength{\taxiStandStart}
+
+\newcommand{\SetupCardLayout}[2]{%
+\setlength{\cardW}{#1}
+\setlength{\cardH}{#2}
+\setlength{\innerW}{\dimexpr\cardW-8mm\relax}
+\setlength{\headerW}{\dimexpr\cardW-51mm\relax}
+\setlength{\headerCall}{.40\headerW}
+\setlength{\headerAircraft}{.34\headerW}
+\setlength{\headerDate}{\dimexpr\headerW-\headerCall-\headerAircraft\relax}
+\setlength{\headerAircraftStart}{\dimexpr47mm+\headerCall\relax}
+\setlength{\headerDateStart}{\dimexpr47mm+\headerCall+\headerAircraft\relax}
+\setlength{\taxiStandW}{28mm}
+\setlength{\altnW}{22mm}
+\setlength{\altnStart}{\dimexpr\cardW-4mm-\altnW\relax}
+\setlength{\originDestStart}{\dimexpr4mm+\taxiStandW\relax}
+\setlength{\originDestW}{\dimexpr\altnStart-\originDestStart\relax}
+\setlength{\routeSlashX}{\dimexpr\originDestStart+.5\originDestW\relax}
+\setlength{\depAtisFreq}{.23\innerW}
+\setlength{\depAtisSlashX}{\dimexpr4mm+.72\depAtisFreq\relax}
+\setlength{\depRwy}{.13\innerW}
+\setlength{\depQnh}{.09\innerW}
+\setlength{\depSqwk}{.12\innerW}
+\setlength{\depInitAlt}{.15\innerW}
+\setlength{\depTransAlt}{.15\innerW}
+\setlength{\depSid}{\dimexpr\innerW-\depAtisFreq-\depSqwk-\depQnh-\depRwy-\depInitAlt-\depTransAlt\relax}
+\setlength{\depSqwkStart}{\dimexpr4mm+\depAtisFreq\relax}
+\setlength{\depQnhStart}{\dimexpr4mm+\depAtisFreq+\depSqwk\relax}
+\setlength{\depRwyStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh\relax}
+\setlength{\depSidStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy\relax}
+\setlength{\depInitAltStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy+\depSid\relax}
+\setlength{\depTransAltStart}{\dimexpr4mm+\depAtisFreq+\depSqwk+\depQnh+\depRwy+\depSid+\depInitAlt\relax}
+\setlength{\arrAtisFreq}{.21\innerW}
+\setlength{\arrAtisSlashX}{\dimexpr4mm+.72\arrAtisFreq\relax}
+\setlength{\arrQnh}{.10\innerW}
+\setlength{\arrTransition}{.15\innerW}
+\setlength{\arrRwy}{.13\innerW}
+\setlength{\arrStar}{\dimexpr\innerW-\arrAtisFreq-\arrQnh-\arrTransition-\arrRwy\relax}
+\setlength{\arrQnhStart}{\dimexpr4mm+\arrAtisFreq\relax}
+\setlength{\arrTransitionStart}{\dimexpr4mm+\arrAtisFreq+\arrQnh\relax}
+\setlength{\arrRwyStart}{\dimexpr4mm+\arrAtisFreq+\arrQnh+\arrTransition\relax}
+\setlength{\arrStarStart}{\dimexpr4mm+\arrAtisFreq+\arrQnh+\arrTransition+\arrRwy\relax}
+\setlength{\taxiStandStart}{\dimexpr\cardW-4mm-\taxiStandW\relax}
+}
+
+\newcommand{\Field}[5]{%
+  \coordinate (fieldbase) at (#1,#2);
+  \filldraw[fill=white, draw=ink, line width=.55pt] (fieldbase) rectangle ++(#3,#4);
+  \node[anchor=north west, font=\bfseries\fontsize{5.35}{6}\selectfont, text=ink]
+    at ($(fieldbase)+(0.1mm,#4-0.1mm)$) {#5};
+  \draw[line width=.25pt, color=muted] ($(fieldbase)+(1mm,1.8mm)$) -- ($(fieldbase)+(#3-1mm,1.8mm)$);
+}
+
+\newcommand{\Band}[2]{%
+  \filldraw[fill=band, draw=ink, line width=.65pt] (4mm,#1) rectangle ++(\innerW,5mm);
+  \node[anchor=west, font=\bfseries\fontsize{7.2}{8}\selectfont, text=ink] at (5mm,#1+2.5mm) {#2};
+}
+
+\newcommand{\Notes}[5]{%
+  \draw[line width=.55pt, color=ink] (#1,#2) rectangle ++(#3,#4);
+  \node[anchor=north west, font=\bfseries\fontsize{5.35}{6}\selectfont, text=muted]
+    at ($(#1,#2)+(1mm,#4-1mm)$) {#5};
+}
+
+\newcommand{\DrawCard}[2]{%
+  \begin{scope}[shift={(#1,#2)}]
+    \draw[line width=.9pt, color=ink] (0,0) rectangle (\cardW,\cardH);
+    \node[anchor=north west, font=\bfseries\fontsize{9}{10}\selectfont, text=ink] at (4mm,\cardH-4mm) {VATSIM FLIGHT CARD};
+    \Field{47mm}{189mm}{\headerCall}{8mm}{CALLSIGN}
+    \Field{\headerAircraftStart}{189mm}{\headerAircraft}{8mm}{AIRCRAFT}
+    \Field{\headerDateStart}{189mm}{\headerDate}{8mm}{DATE}
+    \Field{4mm}{176mm}{\taxiStandW}{11mm}{STAND}
+    \Field{\originDestStart}{177mm}{\originDestW}{10mm}{ORIGIN/DEST.}
+    \Field{\altnStart}{177mm}{\altnW}{10mm}{ALTN}
+    \node[anchor=center, fill=white, inner sep=.45mm,
+      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
+      at (\routeSlashX,179mm) {/};
+
+    \Band{172mm}{DEPARTURE}
+    \Field{4mm}{160mm}{\depAtisFreq}{12mm}{ATIS FREQ / CODE}
+    \node[anchor=center, fill=white, inner sep=.45mm,
+      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
+      at (\depAtisSlashX,162mm) {/};
+    \Field{\depSqwkStart}{160mm}{\depSqwk}{12mm}{SQWK}
+    \Field{\depQnhStart}{160mm}{\depQnh}{12mm}{QNH}
+    \Field{\depRwyStart}{160mm}{\depRwy}{12mm}{RWY}
+    \Field{\depSidStart}{160mm}{\depSid}{12mm}{SID}
+    \Field{\depInitAltStart}{160mm}{\depInitAlt}{12mm}{INIT ALT}
+    \Field{\depTransAltStart}{160mm}{\depTransAlt}{12mm}{TRANS ALT}
+    \Field{4mm}{148mm}{.25\innerW}{12mm}{DEL FREQ}
+    \Field{\dimexpr4mm+.25\innerW\relax}{148mm}{.25\innerW}{12mm}{GND FREQ}
+    \Field{\dimexpr4mm+.50\innerW\relax}{148mm}{.25\innerW}{12mm}{TWR FREQ}
+    \Field{\dimexpr4mm+.75\innerW\relax}{148mm}{\dimexpr.25\innerW\relax}{12mm}{DEP FREQ}
+    \Notes{4mm}{129mm}{\innerW}{19mm}{PUSHBACK / TAXI}
+    \foreach \y in {135,141}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+
+    \Band{124mm}{IN-FLIGHT}
+    \Notes{4mm}{50mm}{\innerW}{74mm}{}
+    \foreach \y in {56,62,68,74,80,86,92,98,104,110,116}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+
+    \Band{45mm}{ARRIVAL}
+    \Field{4mm}{34mm}{\arrAtisFreq}{11mm}{ATIS FREQ / CODE}
+    \node[anchor=center, fill=white, inner sep=.45mm,
+      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
+      at (\arrAtisSlashX,36mm) {/};
+    \Field{\arrQnhStart}{34mm}{\arrQnh}{11mm}{QNH}
+    \Field{\arrTransitionStart}{34mm}{\arrTransition}{11mm}{TRANS FL}
+    \Field{\arrRwyStart}{34mm}{\arrRwy}{11mm}{RWY}
+    \Field{\arrStarStart}{34mm}{\arrStar}{11mm}{STAR}
+    \Field{4mm}{23mm}{.3333\innerW}{11mm}{ARR FREQ}
+    \Field{\dimexpr4mm+.3333\innerW\relax}{23mm}{.3333\innerW}{11mm}{TWR FREQ}
+    \Field{\dimexpr4mm+.6666\innerW\relax}{23mm}{\dimexpr.3334\innerW\relax}{11mm}{GND FREQ}
+    \Notes{4mm}{4mm}{\innerW}{19mm}{TAXI}
+    \draw[line width=.25pt, color=muted] (5mm,9mm) -- (\taxiStandStart-1mm,9mm);
+    \draw[line width=.25pt, color=muted] (5mm,15mm) -- (\cardW-5mm,15mm);
+    \Field{\taxiStandStart}{4mm}{\taxiStandW}{11mm}{STAND}
+  \end{scope}
+}

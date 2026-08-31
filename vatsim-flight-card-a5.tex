@@ -1,4 +1,4 @@
-\documentclass[a4paper,landscape]{article}
+\documentclass[a5paper]{article}
 \usepackage[margin=0mm]{geometry}
 \usepackage{helvet}
 \usepackage{tikz}
@@ -9,16 +9,13 @@
 \pagestyle{empty}
 
 \input{vatsim-flight-card-layout}
-\SetupCardLayout{\dimexpr(\paperwidth-20mm)/2\relax}{\dimexpr\paperheight-10mm\relax}
+\SetupCardLayout{\dimexpr\paperwidth-10mm\relax}{\dimexpr\paperheight-10mm\relax}
 
 \begin{document}
 \AddToShipoutPictureBG*{%
   \AtPageLowerLeft{%
     \begin{tikzpicture}[overlay]
       \DrawCard{5mm}{5mm}
-      \DrawCard{\dimexpr\paperwidth/2+5mm\relax}{5mm}
-      \draw[color=muted, line width=.35pt, dash pattern=on 1mm off 1.5mm]
-        (\dimexpr\paperwidth/2\relax,0.5mm) -- (\dimexpr\paperwidth/2\relax,\dimexpr\paperheight-0.5mm\relax);
     \end{tikzpicture}%
   }%
 }
