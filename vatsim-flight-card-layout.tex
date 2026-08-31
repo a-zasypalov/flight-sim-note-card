@@ -93,6 +93,11 @@
     at ($(#1,#2)+(1mm,#4-1mm)$) {#5};
 }
 
+\newcommand{\Marker}[3]{%
+  \node[anchor=center, fill=white, inner sep=.45mm,
+    font=\bfseries\fontsize{9}{10}\selectfont, text=ink] at (#1,#2) {#3};
+}
+
 \newcommand{\DrawCard}[2]{%
   \begin{scope}[shift={(#1,#2)}]
     \draw[line width=.9pt, color=ink] (0,0) rectangle (\cardW,\cardH);
@@ -103,17 +108,15 @@
     \Field{4mm}{176mm}{\taxiStandW}{11mm}{STAND}
     \Field{\originDestStart}{177mm}{\originDestW}{10mm}{ORIGIN/DEST.}
     \Field{\altnStart}{177mm}{\altnW}{10mm}{ALTN}
-    \node[anchor=center, fill=white, inner sep=.45mm,
-      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
-      at (\routeSlashX,179mm) {/};
+    \Marker{\routeSlashX}{179mm}{/}
 
     \Band{172mm}{DEPARTURE}
     \Field{4mm}{162mm}{\depAtisFreq}{10mm}{ATIS FREQ / INFO}
-    \node[anchor=center, fill=white, inner sep=.45mm,
-      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
-      at (\depAtisSlashX,164mm) {/};
+    \Marker{\depAtisSlashX}{164mm}{/}
+    \Marker{\dimexpr4mm+.36\depAtisFreq\relax}{164mm}{.}
     \Field{\depQnhStart}{162mm}{\depQnh}{10mm}{QNH}
     \Field{\dimexpr4mm+\depAtisFreq+\depQnh\relax}{162mm}{.2\innerW}{10mm}{DEL FREQ}
+    \Marker{\dimexpr4mm+\depAtisFreq+\depQnh+.1\innerW\relax}{164mm}{.}
     \Field{\depSqwkStart}{162mm}{\depSqwk}{10mm}{SQWK}
     \Field{\depRwyStart}{162mm}{\depRwy}{10mm}{RWY}
     \Field{4mm}{152mm}{.25\innerW}{10mm}{SID}
@@ -123,6 +126,9 @@
     \Field{4mm}{142mm}{.3333\innerW}{10mm}{GND FREQ}
     \Field{\dimexpr4mm+.3333\innerW\relax}{142mm}{.3333\innerW}{10mm}{TWR FREQ}
     \Field{\dimexpr4mm+.6666\innerW\relax}{142mm}{\dimexpr.3334\innerW\relax}{10mm}{DEP FREQ}
+    \Marker{\dimexpr4mm+.16665\innerW\relax}{144mm}{.}
+    \Marker{\dimexpr4mm+.49995\innerW\relax}{144mm}{.}
+    \Marker{\dimexpr4mm+.8333\innerW\relax}{144mm}{.}
     \Notes{4mm}{123mm}{\innerW}{19mm}{PUSHBACK / TAXI}
     \foreach \y in {129,135}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
 
@@ -132,9 +138,8 @@
 
     \Band{45mm}{ARRIVAL}
     \Field{4mm}{34mm}{\arrAtisFreq}{11mm}{ATIS FREQ / CODE}
-    \node[anchor=center, fill=white, inner sep=.45mm,
-      font=\bfseries\fontsize{9}{10}\selectfont, text=ink]
-      at (\arrAtisSlashX,36mm) {/};
+    \Marker{\arrAtisSlashX}{36mm}{/}
+    \Marker{\dimexpr4mm+.36\arrAtisFreq\relax}{36mm}{.}
     \Field{\arrQnhStart}{34mm}{\arrQnh}{11mm}{QNH}
     \Field{\arrTransitionStart}{34mm}{\arrTransition}{11mm}{TRANS FL}
     \Field{\arrRwyStart}{34mm}{\arrRwy}{11mm}{RWY}
@@ -142,6 +147,9 @@
     \Field{4mm}{23mm}{.3333\innerW}{11mm}{ARR FREQ}
     \Field{\dimexpr4mm+.3333\innerW\relax}{23mm}{.3333\innerW}{11mm}{TWR FREQ}
     \Field{\dimexpr4mm+.6666\innerW\relax}{23mm}{\dimexpr.3334\innerW\relax}{11mm}{GND FREQ}
+    \Marker{\dimexpr4mm+.16665\innerW\relax}{25mm}{.}
+    \Marker{\dimexpr4mm+.49995\innerW\relax}{25mm}{.}
+    \Marker{\dimexpr4mm+.8333\innerW\relax}{25mm}{.}
     \Notes{4mm}{4mm}{\innerW}{19mm}{TAXI}
     \draw[line width=.25pt, color=muted] (5mm,9mm) -- (\taxiStandStart-1mm,9mm);
     \draw[line width=.25pt, color=muted] (5mm,15mm) -- (\cardW-5mm,15mm);
