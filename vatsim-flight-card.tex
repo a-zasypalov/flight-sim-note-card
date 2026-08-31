@@ -1,0 +1,184 @@
+\documentclass[a4paper,landscape]{article}
+\usepackage[margin=0mm]{geometry}
+\usepackage{helvet}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\usetikzlibrary{calc}
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+
+\definecolor{ink}{gray}{0.16}
+\definecolor{muted}{gray}{0.52}
+\definecolor{band}{gray}{0.92}
+
+\newlength{\cardW}
+\newlength{\cardH}
+\newlength{\innerW}
+\newlength{\headerW}
+\newlength{\headerCall}
+\newlength{\headerAircraft}
+\newlength{\headerDate}
+\newlength{\headerAircraftStart}
+\newlength{\headerDateStart}
+\newlength{\routeA}
+\newlength{\routeB}
+\newlength{\routeBStart}
+\newlength{\depAtis}
+\newlength{\depRwy}
+\newlength{\depQnh}
+\newlength{\depSqwk}
+\newlength{\depInitAlt}
+\newlength{\depSid}
+\newlength{\depTransAlt}
+\newlength{\depRwyStart}
+\newlength{\depQnhStart}
+\newlength{\depSqwkStart}
+\newlength{\depInitAltStart}
+\newlength{\depSidStart}
+\newlength{\depTransAltStart}
+\newlength{\quarter}
+\newlength{\lastQuarter}
+\newlength{\quarterBStart}
+\newlength{\quarterCStart}
+\newlength{\quarterDStart}
+\newlength{\arrAtis}
+\newlength{\arrRwy}
+\newlength{\arrQnh}
+\newlength{\arrTransition}
+\newlength{\arrStar}
+\newlength{\arrRwyStart}
+\newlength{\arrQnhStart}
+\newlength{\arrTransitionStart}
+\newlength{\arrStarStart}
+\newlength{\taxiStandW}
+\newlength{\taxiStandStart}
+\newlength{\rightX}
+\newlength{\cutX}
+\newlength{\cutTop}
+
+\setlength{\cardW}{\dimexpr(\paperwidth-14mm)/2\relax}
+\setlength{\cardH}{\dimexpr\paperheight-10mm\relax}
+\setlength{\innerW}{\dimexpr\cardW-8mm\relax}
+\setlength{\headerW}{\dimexpr\cardW-51mm\relax}
+\setlength{\headerCall}{.40\headerW}
+\setlength{\headerAircraft}{.34\headerW}
+\setlength{\headerDate}{\dimexpr\headerW-\headerCall-\headerAircraft\relax}
+\setlength{\headerAircraftStart}{\dimexpr47mm+\headerCall\relax}
+\setlength{\headerDateStart}{\dimexpr47mm+\headerCall+\headerAircraft\relax}
+\setlength{\routeA}{.50\innerW}
+\setlength{\routeB}{\dimexpr\innerW-\routeA\relax}
+\setlength{\routeBStart}{\dimexpr4mm+\routeA\relax}
+\setlength{\depAtis}{.08\innerW}
+\setlength{\depRwy}{.10\innerW}
+\setlength{\depQnh}{.11\innerW}
+\setlength{\depSqwk}{.13\innerW}
+\setlength{\depInitAlt}{.20\innerW}
+\setlength{\depSid}{.20\innerW}
+\setlength{\depTransAlt}{\dimexpr\innerW-\depAtis-\depRwy-\depQnh-\depSqwk-\depInitAlt-\depSid\relax}
+\setlength{\depRwyStart}{\dimexpr4mm+\depAtis\relax}
+\setlength{\depQnhStart}{\dimexpr4mm+\depAtis+\depRwy\relax}
+\setlength{\depSqwkStart}{\dimexpr4mm+\depAtis+\depRwy+\depQnh\relax}
+\setlength{\depInitAltStart}{\dimexpr4mm+\depAtis+\depRwy+\depQnh+\depSqwk\relax}
+\setlength{\depSidStart}{\dimexpr4mm+\depAtis+\depRwy+\depQnh+\depSqwk+\depInitAlt\relax}
+\setlength{\depTransAltStart}{\dimexpr4mm+\depAtis+\depRwy+\depQnh+\depSqwk+\depInitAlt+\depSid\relax}
+\setlength{\quarter}{.25\innerW}
+\setlength{\lastQuarter}{\dimexpr\innerW-3\quarter\relax}
+\setlength{\quarterBStart}{\dimexpr4mm+\quarter\relax}
+\setlength{\quarterCStart}{\dimexpr4mm+\quarter+\quarter\relax}
+\setlength{\quarterDStart}{\dimexpr4mm+\quarter+\quarter+\quarter\relax}
+\setlength{\arrAtis}{.08\innerW}
+\setlength{\arrRwy}{.10\innerW}
+\setlength{\arrQnh}{.11\innerW}
+\setlength{\arrTransition}{.27\innerW}
+\setlength{\arrStar}{\dimexpr\innerW-\arrAtis-\arrRwy-\arrQnh-\arrTransition\relax}
+\setlength{\arrRwyStart}{\dimexpr4mm+\arrAtis\relax}
+\setlength{\arrQnhStart}{\dimexpr4mm+\arrAtis+\arrRwy\relax}
+\setlength{\arrTransitionStart}{\dimexpr4mm+\arrAtis+\arrRwy+\arrQnh\relax}
+\setlength{\arrStarStart}{\dimexpr4mm+\arrAtis+\arrRwy+\arrQnh+\arrTransition\relax}
+\setlength{\taxiStandW}{28mm}
+\setlength{\taxiStandStart}{\dimexpr\cardW-4mm-\taxiStandW\relax}
+\setlength{\rightX}{\dimexpr5mm+\cardW+4mm\relax}
+\setlength{\cutX}{\dimexpr5mm+\cardW+2mm\relax}
+\setlength{\cutTop}{\dimexpr\paperheight-3mm\relax}
+
+\newcommand{\Field}[5]{%
+  \coordinate (fieldbase) at (#1,#2);
+  \filldraw[fill=white, draw=ink, line width=.55pt] (fieldbase) rectangle ++(#3,#4);
+  \node[anchor=north west, font=\bfseries\fontsize{5.35}{6}\selectfont, text=ink]
+    at ($(fieldbase)+(1mm,#4-1mm)$) {#5};
+  \draw[line width=.25pt, color=muted] ($(fieldbase)+(1mm,1.8mm)$) -- ($(fieldbase)+(#3-1mm,1.8mm)$);
+}
+
+\newcommand{\Band}[2]{%
+  \filldraw[fill=band, draw=ink, line width=.65pt] (4mm,#1) rectangle ++(\innerW,5mm);
+  \node[anchor=west, font=\bfseries\fontsize{7.2}{8}\selectfont, text=ink] at (5mm,#1+2.5mm) {#2};
+}
+
+\newcommand{\Notes}[5]{%
+  \draw[line width=.55pt, color=ink] (#1,#2) rectangle ++(#3,#4);
+  \node[anchor=north west, font=\bfseries\fontsize{5.35}{6}\selectfont, text=muted]
+    at ($(#1,#2)+(1mm,#4-1mm)$) {#5};
+}
+
+\newcommand{\DrawCard}[2]{%
+  \begin{scope}[shift={(#1,#2)}]
+    \draw[line width=.9pt, color=ink] (0,0) rectangle (\cardW,\cardH);
+    \node[anchor=north west, font=\bfseries\fontsize{9}{10}\selectfont, text=ink] at (4mm,\cardH-3mm) {VATSIM FLIGHT CARD};
+    \Field{47mm}{188mm}{\headerCall}{8mm}{CALLSIGN}
+    \Field{\headerAircraftStart}{188mm}{\headerAircraft}{8mm}{AIRCRAFT}
+    \Field{\headerDateStart}{188mm}{\headerDate}{8mm}{DATE}
+    \Field{4mm}{177mm}{\routeA}{10mm}{DEP. / STAND}
+    \Field{\routeBStart}{177mm}{\routeB}{10mm}{DEST.}
+
+    \Band{172mm}{DEPARTURE}
+    \Field{4mm}{160mm}{\depAtis}{12mm}{ATIS}
+    \Field{\depRwyStart}{160mm}{\depRwy}{12mm}{RWY}
+    \Field{\depQnhStart}{160mm}{\depQnh}{12mm}{QNH}
+    \Field{\depSqwkStart}{160mm}{\depSqwk}{12mm}{SQWK}
+    \Field{\depInitAltStart}{160mm}{\depInitAlt}{12mm}{INIT ALT}
+    \Field{\depSidStart}{160mm}{\depSid}{12mm}{SID}
+    \Field{\depTransAltStart}{160mm}{\depTransAlt}{12mm}{TRANS ALT}
+    \Field{4mm}{148mm}{\quarter}{12mm}{ATIS FREQ}
+    \Field{\quarterBStart}{148mm}{\quarter}{12mm}{GND FREQ}
+    \Field{\quarterCStart}{148mm}{\quarter}{12mm}{TWR FREQ}
+    \Field{\quarterDStart}{148mm}{\lastQuarter}{12mm}{DEP FREQ}
+    \Notes{4mm}{129mm}{\innerW}{19mm}{TAXI}
+    \foreach \y in {135,141}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+
+    \Band{124mm}{IN-FLIGHT}
+    \Notes{4mm}{50mm}{\innerW}{74mm}{}
+    \foreach \y in {56,62,68,74,80,86,92,98,104,110,116}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+
+    \Band{45mm}{ARRIVAL}
+    \Field{4mm}{34mm}{\arrAtis}{11mm}{ATIS}
+    \Field{\arrRwyStart}{34mm}{\arrRwy}{11mm}{RWY}
+    \Field{\arrQnhStart}{34mm}{\arrQnh}{11mm}{QNH}
+    \Field{\arrTransitionStart}{34mm}{\arrTransition}{11mm}{TRANSITION}
+    \Field{\arrStarStart}{34mm}{\arrStar}{11mm}{STAR}
+    \Field{4mm}{23mm}{\quarter}{11mm}{ATIS FREQ}
+    \Field{\quarterBStart}{23mm}{\quarter}{11mm}{ARR FREQ}
+    \Field{\quarterCStart}{23mm}{\quarter}{11mm}{TWR FREQ}
+    \Field{\quarterDStart}{23mm}{\lastQuarter}{11mm}{GND FREQ}
+    \Notes{4mm}{4mm}{\innerW}{19mm}{TAXI}
+    \draw[line width=.25pt, color=muted] (5mm,9mm) -- (\taxiStandStart-1mm,9mm);
+    \draw[line width=.25pt, color=muted] (5mm,15mm) -- (\cardW-5mm,15mm);
+    \Field{\taxiStandStart}{4mm}{\taxiStandW}{11mm}{STAND}
+  \end{scope}
+}
+
+\begin{document}
+\AddToShipoutPictureBG*{%
+  \AtPageLowerLeft{%
+    \begin{tikzpicture}[overlay]
+      \DrawCard{5mm}{5mm}
+      \DrawCard{\rightX}{5mm}
+      \draw[color=muted, line width=.35pt, dash pattern=on 1mm off 1.5mm]
+        (\cutX,5mm) -- (\cutX,\cutTop);
+      \node[anchor=south, font=\bfseries\fontsize{4.5}{5}\selectfont, text=muted]
+        at (\cutX,\cutTop) {CUT};
+    \end{tikzpicture}%
+  }%
+}
+\mbox{}
+\end{document}
