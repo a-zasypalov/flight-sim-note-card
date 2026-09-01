@@ -139,7 +139,7 @@ download.addEventListener("click", () => {
   requestAnimationFrame(async () => {
     try {
       await buildPdf();
-      setStatus("Your PDF is ready.");
+      setStatus("PDF is ready, have a great flight! 🛫");
     } catch {
       setStatus("The PDF could not be generated. Try a different logo file.", true);
     }

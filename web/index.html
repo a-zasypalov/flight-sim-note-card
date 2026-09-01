@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Create a VATSIM flight card PDF with your airline logo." />
-    <title>VATSIM Flight Card Generator</title>
+    <title>Flight Notes Card Generator</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app-shell">
       <header class="page-header">
-        <p class="eyebrow">LOCAL PDF GENERATOR</p>
-        <h1>VATSIM Flight Card</h1>
-        <p>Create a print-ready card with your airline logo. Nothing leaves your browser.</p>
+        <p class="eyebrow">HANDY FOR VATSIM PILOTS</p>
+        <h1>🛩️ Flight Notes</h1>
+        <p>Create a print-ready note card. Generated in your browser, no data transfered.</p>
       </header>
 
       <div class="app-grid">
@@ -23,18 +23,18 @@
             <legend>Paper format</legend>
             <label>
               <input type="radio" name="format" value="a4" checked />
-              <span>A4 <small>two cards</small></span>
+              <span>A4 <small>1 page, 2 cards</small></span>
             </label>
             <label>
               <input type="radio" name="format" value="a5" />
-              <span>A5 <small>one card</small></span>
+              <span>A5 <small>1 page, 1 card</small></span>
             </label>
           </fieldset>
 
           <section class="logo-section" aria-labelledby="logo-title">
             <div class="section-heading">
               <h3 id="logo-title">Airline logo</h3>
-              <span>Optional</span>
+              <span>(optional)</span>
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
             <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="logo-help">
@@ -43,10 +43,10 @@
             </div>
             <div class="logo-actions">
               <button id="pick-logo" class="secondary" type="button">Choose logo</button>
-              <p id="file-name" aria-live="polite">No image selected</p>
+              <p id="file-name" aria-live="polite">No logo</p>
               <button id="delete-logo" class="secondary" type="button" hidden>Delete</button>
             </div>
-            <p id="logo-help" class="hint">PNG, JPEG, WebP, or SVG. The full logo is centred without cropping.</p>
+            <p id="logo-help" class="hint">PNG, JPEG, WebP, or SVG.</p>
           </section>
 
           <button id="download" class="download" type="button">Download PDF</button>
@@ -56,7 +56,7 @@
         <section class="panel preview-panel" aria-labelledby="preview-title">
           <div class="preview-heading">
             <h2 id="preview-title">Preview</h2>
-            <span id="preview-label">A4 - two cards</span>
+            <span id="preview-label">A4</span>
           </div>
           <div class="preview-frame">
             <div id="preview-paper" class="preview-paper a4">
@@ -64,7 +64,6 @@
               <div id="preview-logos" aria-hidden="true"></div>
             </div>
           </div>
-          <p class="hint">The card is vector-sharp; uploaded logos are placed at 300 DPI.</p>
         </section>
       </div>
     </main>

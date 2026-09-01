@@ -1,6 +1,6 @@
 export const FORMATS = {
   a4: {
-    label: "A4 - two cards",
+    label: "A4",
     page: [297, 210],
     template: "/templates/vatsim-flight-card-a4.pdf",
     preview: "/templates/vatsim-flight-card-a4.png",
@@ -8,7 +8,7 @@ export const FORMATS = {
     logoBoxes: [{ x: 10.5, y: 193.5, width: 38, height: 9 }, { x: 159, y: 193.5, width: 38, height: 9 }]
   },
   a5: {
-    label: "A5 - one card",
+    label: "A5",
     page: [148, 210],
     template: "/templates/vatsim-flight-card-a5.pdf",
     preview: "/templates/vatsim-flight-card-a5.png",
