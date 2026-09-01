@@ -1,6 +1,7 @@
 \definecolor{ink}{gray}{0.16}
 \definecolor{muted}{gray}{0.52}
 \definecolor{band}{gray}{0.92}
+\newcommand{\AirlineLogoFile}{logo/dlh.png}
 
 \newlength{\cardW}
 \newlength{\cardH}
@@ -101,7 +102,15 @@
 \newcommand{\DrawCard}[2]{%
   \begin{scope}[shift={(#1,#2)}]
     \draw[line width=.9pt, color=ink] (0,0) rectangle (\cardW,\cardH);
-    \node[anchor=north west, font=\bfseries\fontsize{9}{10}\selectfont, text=ink] at (4mm,\cardH-4mm) {VATSIM FLIGHT CARD};
+    % No-logo option with VATSIM FLIGHT CARD title
+    % \node[anchor=north west, font=\bfseries\fontsize{9}{10}\selectfont, text=ink] at (4mm,\cardH-4mm) {VATSIM FLIGHT CARD};
+
+    % Red frame for the logo container
+    % \draw[color=red, line width=.45pt] (4mm,189mm) rectangle (45mm,197mm);
+
+    % Logo
+    \node[anchor=center, inner sep=0pt] at (24.5mm,193mm) {\includegraphics[width=38mm,height=9mm,keepaspectratio]{\AirlineLogoFile}};
+
     \Field{47mm}{189mm}{\headerCall}{8mm}{CALLSIGN}
     \Field{\headerAircraftStart}{189mm}{\headerAircraft}{8mm}{AIRCRAFT}
     \Field{\headerDateStart}{189mm}{\headerDate}{8mm}{DATE}
