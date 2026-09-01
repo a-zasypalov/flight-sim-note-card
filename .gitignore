@@ -3,3 +3,5 @@
 latex/logo/*
 web/node_modules/
 web/dist/
+web/public/templates/*.aux
+web/public/templates/*.log

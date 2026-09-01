@@ -34,7 +34,7 @@
           <section class="logo-section" aria-labelledby="logo-title">
             <div class="section-heading">
               <h3 id="logo-title">Airline logo</h3>
-              <span>Required</span>
+              <span>Optional</span>
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
             <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="logo-help">
@@ -44,11 +44,12 @@
             <div class="logo-actions">
               <button id="pick-logo" class="secondary" type="button">Choose logo</button>
               <p id="file-name" aria-live="polite">No image selected</p>
+              <button id="delete-logo" class="secondary" type="button" hidden>Delete</button>
             </div>
             <p id="logo-help" class="hint">PNG, JPEG, WebP, or SVG. The full logo is centred without cropping.</p>
           </section>
 
-          <button id="download" class="download" type="button" disabled>Download PDF</button>
+          <button id="download" class="download" type="button">Download PDF</button>
           <p id="status" class="status" role="status" aria-live="polite"></p>
         </section>
 
@@ -58,9 +59,12 @@
             <span id="preview-label">A4 - two cards</span>
           </div>
           <div class="preview-frame">
-            <canvas id="preview" aria-label="Flight card preview"></canvas>
+            <div id="preview-paper" class="preview-paper a4">
+              <img id="preview-image" alt="" />
+              <div id="preview-logos" aria-hidden="true"></div>
+            </div>
           </div>
-          <p class="hint">The PDF is drawn at 300 DPI for printing.</p>
+          <p class="hint">The card is vector-sharp; uploaded logos are placed at 300 DPI.</p>
         </section>
       </div>
     </main>

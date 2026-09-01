@@ -64,7 +64,11 @@ h3 { margin: 0; font-size: .9rem; }
 
 .logo-actions { margin-bottom: 10px; }
 
-#file-name { min-width: 0; margin: 0; overflow: hidden; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+#pick-logo { flex: 0 0 108px; white-space: nowrap; }
+
+#delete-logo { flex: 0 0 62px; }
+
+#file-name { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 
 .hint { margin-bottom: 0; }
 
@@ -86,9 +90,19 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-heading h2 { margin: 0; }
 
-.preview-frame { overflow: hidden; border: 1px solid #d8dce0; border-radius: 7px; background: #cfd5da; }
+.preview-frame { display: grid; aspect-ratio: 297 / 210; overflow: hidden; place-items: center; border: 1px solid #d8dce0; border-radius: 7px; background: #cfd5da; }
 
-#preview { display: block; width: 100%; height: auto; background: #fff; }
+.preview-paper { position: relative; height: 100%; }
+
+.preview-paper.a4 { width: 100%; }
+
+.preview-paper.a5 { width: 49.83165%; }
+
+#preview-image { display: block; width: 100%; height: 100%; }
+
+#preview-logos { position: absolute; inset: 0; }
+
+.preview-logo { position: absolute; object-fit: contain; }
 
 .preview-panel > .hint { margin: 12px 0 0; text-align: right; }
 

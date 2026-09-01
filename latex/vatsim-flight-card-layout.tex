@@ -1,7 +1,7 @@
 \definecolor{ink}{gray}{0.16}
 \definecolor{muted}{gray}{0.52}
 \definecolor{band}{gray}{0.92}
-\newcommand{\AirlineLogoFile}{logo/dlh.png}
+\providecommand{\AirlineLogoFile}{logo/dlh.png}
 
 \newlength{\cardW}
 \newlength{\cardH}
@@ -109,7 +109,9 @@
     % \draw[color=red, line width=.45pt] (4mm,189mm) rectangle (45mm,197mm);
 
     % Logo
-    \node[anchor=center, inner sep=0pt] at (24.5mm,193mm) {\includegraphics[width=38mm,height=9mm,keepaspectratio]{\AirlineLogoFile}};
+    \ifx\AirlineLogoFile\empty\else
+      \node[anchor=center, inner sep=0pt] at (24.5mm,193mm) {\includegraphics[width=38mm,height=9mm,keepaspectratio]{\AirlineLogoFile}};
+    \fi
 
     \Field{47mm}{189mm}{\headerCall}{8mm}{CALLSIGN}
     \Field{\headerAircraftStart}{189mm}{\headerAircraft}{8mm}{AIRCRAFT}
