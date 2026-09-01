@@ -1,0 +1,16 @@
+{
+  "name": "vatsim-flight-card-generator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "node check-layout.mjs"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}

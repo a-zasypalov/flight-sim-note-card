@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Create a VATSIM flight card PDF with your airline logo." />
+    <title>VATSIM Flight Card Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="page-header">
+        <p class="eyebrow">LOCAL PDF GENERATOR</p>
+        <h1>VATSIM Flight Card</h1>
+        <p>Create a print-ready card with your airline logo. Nothing leaves your browser.</p>
+      </header>
+
+      <div class="app-grid">
+        <section class="panel controls" aria-labelledby="controls-title">
+          <h2 id="controls-title">Card options</h2>
+
+          <fieldset class="format-picker">
+            <legend>Paper format</legend>
+            <label>
+              <input type="radio" name="format" value="a4" checked />
+              <span>A4 <small>two cards</small></span>
+            </label>
+            <label>
+              <input type="radio" name="format" value="a5" />
+              <span>A5 <small>one card</small></span>
+            </label>
+          </fieldset>
+
+          <section class="logo-section" aria-labelledby="logo-title">
+            <div class="section-heading">
+              <h3 id="logo-title">Airline logo</h3>
+              <span>Required</span>
+            </div>
+            <input id="logo-input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden />
+            <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="logo-help">
+              <strong>Drop your logo here</strong>
+              <span>or choose an image from your device</span>
+            </div>
+            <div class="logo-actions">
+              <button id="pick-logo" class="secondary" type="button">Choose logo</button>
+              <p id="file-name" aria-live="polite">No image selected</p>
+            </div>
+            <p id="logo-help" class="hint">PNG, JPEG, WebP, or SVG. The full logo is centred without cropping.</p>
+          </section>
+
+          <button id="download" class="download" type="button" disabled>Download PDF</button>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel preview-panel" aria-labelledby="preview-title">
+          <div class="preview-heading">
+            <h2 id="preview-title">Preview</h2>
+            <span id="preview-label">A4 - two cards</span>
+          </div>
+          <div class="preview-frame">
+            <canvas id="preview" aria-label="Flight card preview"></canvas>
+          </div>
+          <p class="hint">The PDF is drawn at 300 DPI for printing.</p>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
