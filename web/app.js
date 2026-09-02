@@ -42,7 +42,7 @@ function updatePreview() {
     const text = state.plans[index]?.[key];
     if (!text) return [];
     const value = document.createElement("span");
-    value.className = ["origin", "destination", "alternate", "cruise"].includes(key) ? "preview-value-large" : "preview-value";
+    value.className = ["callsign", "aircraft", "origin", "destination", "alternate", "cruise"].includes(key) ? "preview-value-large" : "preview-value";
     value.textContent = text;
     value.style.left = `${box.x / format.page[0] * 100}%`;
     value.style.bottom = `${box.y / format.page[1] * 100}%`;
@@ -177,10 +177,10 @@ async function buildPdf() {
   format.cards.forEach((card, index) => Object.entries(card.valueBoxes).forEach(([key, box]) => {
     const text = state.plans[index]?.[key];
     if (!text) return;
-    const size = 7.4;
+    const size = box.size;
     const width = font.widthOfTextAtSize(text, size);
     const boxWidth = box.width * MM_TO_PT;
-    const x = box.x * MM_TO_PT + (box.align === "center" ? (boxWidth - width) / 2 : 0);
+    const x = box.x * MM_TO_PT + (box.align === "center" ? (boxWidth - width) / 2 : box.align === "right" ? boxWidth - width : 0);
     page.drawText(text, { x, y: box.y * MM_TO_PT, size, font, color: rgb(.16, .16, .16) });
   }));
   const url = URL.createObjectURL(new Blob([await pdf.save()], { type: "application/pdf" }));

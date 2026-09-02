@@ -5,14 +5,14 @@ function card(x, width) {
   const originStart = x + 32;
   const headerAircraft = x + 47 + header * .35;
   const headerDate = x + 47 + header * .7;
-  const value = (x, y, width, align = "left") => ({ x, y, width, align });
+  const value = (x, y, width, align = "left", size = 7.4) => ({ x, y, width, align, size });
 
   return {
     logoBox: { x: x + 5.5, y: 193.5, width: 38, height: 9 },
     valueBoxes: {
-      callsign: value(x + 48, 195.3, header * .35 - 2),
-      aircraft: value(headerAircraft + 1, 195.3, header * .35 - 2),
-      date: value(headerDate + 1, 195.3, header * .3 - 2),
+      callsign: value(x + 48, 195.3, header * .35 - 2, "right", 8.5),
+      aircraft: value(headerAircraft + 1, 195.3, header * .35 - 2, "right", 8.5),
+      date: value(headerDate + 1, 195.3, header * .3 - 2, "right", 8.5),
       origin: value(originStart + 1, 184.3, originDest / 2 - 2, "center"),
       destination: value(originStart + originDest / 2 + 1, 184.3, originDest / 2 - 2, "center"),
       alternate: value(x + width - 25, 184.3, 20, "center"),
