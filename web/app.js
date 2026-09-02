@@ -69,6 +69,8 @@ function setFile(file) {
     if (state.url) URL.revokeObjectURL(state.url);
     state.logo = image;
     state.url = url;
+    dropZone.style.setProperty("--logo-preview", `url("${url}")`);
+    dropZone.classList.add("has-logo");
     fileName.textContent = file.name;
     picker.textContent = "Replace logo";
     deleteLogo.hidden = false;
@@ -87,6 +89,8 @@ function removeLogo() {
   if (state.url) URL.revokeObjectURL(state.url);
   state.logo = null;
   state.url = null;
+  dropZone.style.removeProperty("--logo-preview");
+  dropZone.classList.remove("has-logo");
   input.value = "";
   fileName.textContent = "No image selected";
   picker.textContent = "Choose logo";

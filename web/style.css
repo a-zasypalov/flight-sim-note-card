@@ -55,7 +55,13 @@ h3 { margin: 0; font-size: .9rem; }
 
 .section-heading span, .preview-heading span { color: #6a737d; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 
-.drop-zone { display: grid; place-items: center; min-height: 145px; margin: 11px 0; padding: 20px; border: 1px dashed #9aa3ab; border-radius: 9px; background: #fafbfb; cursor: pointer; text-align: center; }
+.drop-zone { position: relative; display: grid; place-items: center; min-height: 105px; margin: 11px 0; padding: 20px; overflow: hidden; border: 1px dashed #9aa3ab; border-radius: 9px; background: #fafbfb; cursor: pointer; isolation: isolate; text-align: center; }
+
+.drop-zone::before { position: absolute; z-index: 0; inset: 12px; background: var(--logo-preview) center / contain no-repeat; content: ""; opacity: 0; pointer-events: none; }
+
+.drop-zone.has-logo::before { opacity: .16; }
+
+.drop-zone > * { position: relative; z-index: 1; }
 
 .drop-zone.dragging { border-color: #20252c; background: #f0f3f5; }
 

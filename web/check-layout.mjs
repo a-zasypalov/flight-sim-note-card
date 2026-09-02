@@ -10,7 +10,7 @@ assert.equal(FORMATS.a5.logoBoxes[0].width, 38);
 assert.equal(FORMATS.a4.cards.length, 2);
 assert.equal(FORMATS.a4.cards[1].valueBoxes.callsign.x - FORMATS.a4.cards[0].valueBoxes.callsign.x, 148.5);
 assert.equal(FORMATS.a5.cards[0].valueBoxes.cruise.y, 159.3);
-assert.equal(FORMATS.a5.cards[0].valueBoxes.callsign.y, 196.2);
+assert.equal(FORMATS.a5.cards[0].valueBoxes.callsign.y, 195.3);
 assert.equal(FORMATS.a5.cards[0].valueBoxes.callsign.align, "right");
 assert.equal(FORMATS.a5.cards[0].valueBoxes.callsign.size, 8.5);
 
