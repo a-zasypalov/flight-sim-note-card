@@ -1,6 +1,6 @@
 # VATSIM Flight Card
 
-LaTeX templates live in `latex/`. The browser-only generator lives in `web/`.
+LaTeX templates live in `latex/`. The browser-only generator lives in `web/` and can prefill card basics from an ICAO `(FPL-...)` message.
 
 Run the web app with `cd web && npm install && npm run dev`. Build it with `npm run build`.
 

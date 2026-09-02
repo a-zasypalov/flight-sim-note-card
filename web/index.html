@@ -23,13 +23,21 @@
             <legend>Paper format</legend>
             <label>
               <input type="radio" name="format" value="a4" checked />
-              <span>A4 <small>1 page, 2 cards</small></span>
+              <span>A4 - 2 cards</span>
             </label>
             <label>
               <input type="radio" name="format" value="a5" />
-              <span>A5 <small>1 page, 1 card</small></span>
+              <span>A5 - 1 card</span>
             </label>
           </fieldset>
+
+          <section class="fpl-section" aria-labelledby="fpl-section-title">
+            <div class="section-heading">
+              <h3 id="fpl-section-title">ICAO flight plan</h3>
+              <span>(optional)</span>
+            </div>
+            <div id="fpl-slots" class="fpl-slots"></div>
+          </section>
 
           <section class="logo-section" aria-labelledby="logo-title">
             <div class="section-heading">
@@ -43,10 +51,9 @@
             </div>
             <div class="logo-actions">
               <button id="pick-logo" class="secondary" type="button">Choose logo</button>
-              <p id="file-name" aria-live="polite">No logo</p>
+              <p id="file-name" aria-live="polite">PNG, JPEG, WebP, SVG</p>
               <button id="delete-logo" class="secondary" type="button" hidden>Delete</button>
             </div>
-            <p id="logo-help" class="hint">PNG, JPEG, WebP, or SVG.</p>
           </section>
 
           <button id="download" class="download" type="button">Download PDF</button>
@@ -62,12 +69,27 @@
             <div id="preview-paper" class="preview-paper a4">
               <img id="preview-image" alt="" />
               <div id="preview-logos" aria-hidden="true"></div>
+              <div id="preview-values" aria-hidden="true"></div>
             </div>
           </div>
         </section>
       </div>
       <p class="eyebrow" style="margin-top:50px;">For simulator use only. Not suitable for real world flight operations.</p>
     </main>
+    <dialog id="fpl-dialog" aria-labelledby="fpl-title">
+      <form id="fpl-form" class="dialog-form">
+        <div class="dialog-heading">
+          <h2 id="fpl-title">Import ICAO FPL</h2>
+          <p>Paste a complete ICAO flight plan.</p>
+        </div>
+        <textarea id="fpl-input" aria-describedby="fpl-help fpl-error" autocapitalize="characters" spellcheck="false" placeholder="(FPL-RYR421-IS ... )" required></textarea>
+        <p id="fpl-error" class="fpl-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button id="fpl-cancel" class="secondary" type="button">Cancel</button>
+          <button class="download" type="submit">Import</button>
+        </div>
+      </form>
+    </dialog>
     <script type="module" src="app.js"></script>
   </body>
 </html>
