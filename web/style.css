@@ -125,15 +125,13 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-frame { position: relative; display: grid; aspect-ratio: 297 / 210; overflow: hidden; place-items: center; container-type: size; border: 1px solid #d8dce0; border-radius: 7px; background: #cfd5da; }
 
-.preview-paper { position: relative; height: 100%; }
+.preview-paper { position: absolute; inset: 0; height: 100%; margin: auto; pointer-events: none; }
 
-.preview-transition { position: absolute; z-index: 1; inset: 0; width: auto; height: 100%; margin: auto; pointer-events: none; will-change: opacity, transform; }
+.preview-paper.is-hidden { visibility: hidden; }
 
-.preview-transition.fade-out { opacity: 0; transition: opacity .12s ease-out; }
+.preview-paper.fade-out { opacity: 0; transition: opacity .12s ease-out; }
 
-.preview-transition.a5 { transform: translateX(0); }
-
-.preview-transition.a5.to-left { transform: translateX(-50%); transition: transform .18s cubic-bezier(.22,.61,.36,1); }
+.preview-paper.a5.to-left { transform: translateX(-50%); transition: transform .18s cubic-bezier(.22,.61,.36,1); }
 
 .preview-paper.sequence-a4, .preview-paper.sequence-a5 { z-index: 2; opacity: 0; will-change: opacity, transform; }
 
@@ -147,9 +145,9 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-paper.a5 { width: 49.83165%; }
 
-#preview-image { display: block; width: 100%; height: 100%; }
+.preview-image { display: block; width: 100%; height: 100%; }
 
-#preview-logos, #preview-values { position: absolute; inset: 0; }
+.preview-logos, .preview-values { position: absolute; inset: 0; }
 
 .preview-logo { position: absolute; object-fit: contain; }
 

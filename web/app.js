@@ -8,11 +8,7 @@ const picker = document.querySelector("#pick-logo");
 const deleteLogo = document.querySelector("#delete-logo");
 const fileName = document.querySelector("#file-name");
 const controls = document.querySelector(".controls");
-const previewFrame = document.querySelector(".preview-frame");
-const previewPaper = document.querySelector("#preview-paper");
-const previewImage = document.querySelector("#preview-image");
-const previewLogos = document.querySelector("#preview-logos");
-const previewValues = document.querySelector("#preview-values");
+const previewPapers = Object.fromEntries([...document.querySelectorAll(".preview-paper")].map((paper) => [paper.dataset.format, paper]));
 const previewLabel = document.querySelector("#preview-label");
 const download = document.querySelector("#download");
 const status = document.querySelector("#status");
@@ -30,46 +26,57 @@ let controlLayoutTimeout;
 let transitionPaper;
 let previewTimeouts = [];
 
-function updatePreview() {
-  const format = FORMATS[state.format];
-  previewPaper.className = `preview-paper ${state.format}`;
-  previewImage.src = format.preview;
-  previewLogos.replaceChildren(...format.logoBoxes.map((box) => {
+function updatePreview(format) {
+  const paper = previewPapers[format];
+  const spec = FORMATS[format];
+  const image = paper.querySelector(".preview-image");
+  const logos = paper.querySelector(".preview-logos");
+  const values = paper.querySelector(".preview-values");
+  if (image.getAttribute("src") !== spec.preview) image.src = spec.preview;
+  logos.replaceChildren(...spec.logoBoxes.map((box) => {
     const logo = new Image();
     logo.className = "preview-logo";
     logo.src = state.url || "";
-    logo.style.left = `${box.x / format.page[0] * 100}%`;
-    logo.style.bottom = `${box.y / format.page[1] * 100}%`;
-    logo.style.width = `${box.width / format.page[0] * 100}%`;
-    logo.style.height = `${box.height / format.page[1] * 100}%`;
+    logo.style.left = `${box.x / spec.page[0] * 100}%`;
+    logo.style.bottom = `${box.y / spec.page[1] * 100}%`;
+    logo.style.width = `${box.width / spec.page[0] * 100}%`;
+    logo.style.height = `${box.height / spec.page[1] * 100}%`;
     return logo;
   }));
-  previewValues.replaceChildren(...format.cards.flatMap((card, index) => Object.entries(card.valueBoxes).flatMap(([key, box]) => {
+  values.replaceChildren(...spec.cards.flatMap((card, index) => Object.entries(card.valueBoxes).flatMap(([key, box]) => {
     const text = state.plans[index]?.[key];
     if (!text) return [];
     const value = document.createElement("span");
     value.className = ["callsign", "aircraft", "origin", "destination", "alternate", "cruise"].includes(key) ? "preview-value-large" : "preview-value";
     value.textContent = text;
-    value.style.left = `${box.x / format.page[0] * 100}%`;
-    value.style.bottom = `${box.y / format.page[1] * 100}%`;
-    value.style.width = `${box.width / format.page[0] * 100}%`;
+    value.style.left = `${box.x / spec.page[0] * 100}%`;
+    value.style.bottom = `${box.y / spec.page[1] * 100}%`;
+    value.style.width = `${box.width / spec.page[0] * 100}%`;
     value.style.textAlign = box.align;
     return value;
   })));
-  previewLabel.textContent = format.label;
+}
+
+function updatePreviews() {
+  updatePreview("a4");
+  updatePreview("a5");
+  previewLabel.textContent = FORMATS[state.format].label;
 }
 
 function reducedMotion() {
   return matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function clearPreviewTransition() {
+function showPreview(format) {
+  Object.entries(previewPapers).forEach(([key, paper]) => paper.classList.toggle("is-hidden", key !== format));
+}
+
+function clearPreviewTransition(format = state.format) {
   previewTimeouts.forEach(clearTimeout);
   previewTimeouts = [];
-  transitionPaper?.remove();
   transitionPaper = null;
-  previewPaper.style.visibility = "";
-  previewPaper.classList.remove("sequence-a4", "sequence-a5", "sequence-visible", "to-center");
+  Object.values(previewPapers).forEach((paper) => paper.classList.remove("sequence-a4", "sequence-a5", "sequence-visible", "to-center", "to-left", "fade-out"));
+  showPreview(format);
 }
 
 function clearControlsTransition() {
@@ -118,26 +125,28 @@ function animateControls(fromHeight) {
   controlsTimeout = setTimeout(clearControlsTransition, 260);
 }
 
-function animatePreview(previousFormat, snapshot) {
-  if (!snapshot) return;
-  snapshot.classList.add("preview-transition");
-  transitionPaper = snapshot;
-  previewFrame.append(snapshot);
-  const later = (action, delay) => previewTimeouts.push(setTimeout(() => transitionPaper === snapshot && action(), delay));
-  const start = (action) => requestAnimationFrame(() => requestAnimationFrame(() => transitionPaper === snapshot && action()));
-  if (previousFormat === "a4") previewPaper.classList.add("sequence-a5");
-  else previewPaper.classList.add("sequence-a4");
+function animatePreview(previousFormat) {
+  if (reducedMotion()) return showPreview(state.format);
+  const previous = previewPapers[previousFormat];
+  const next = previewPapers[state.format];
+  transitionPaper = next;
+  showPreview(previousFormat);
+  next.classList.remove("is-hidden");
+  const later = (action, delay) => previewTimeouts.push(setTimeout(() => transitionPaper === next && action(), delay));
+  const start = (action) => requestAnimationFrame(() => requestAnimationFrame(() => transitionPaper === next && action()));
+  if (previousFormat === "a4") next.classList.add("sequence-a5");
+  else next.classList.add("sequence-a4");
   start(() => {
     if (previousFormat === "a4") {
-      previewPaper.classList.add("sequence-visible");
-      later(() => snapshot.classList.add("fade-out"), 130);
-      later(() => previewPaper.classList.add("to-center"), 260);
+      next.classList.add("sequence-visible");
+      later(() => previous.classList.add("fade-out"), 130);
+      later(() => next.classList.add("to-center"), 260);
     } else {
-      snapshot.classList.add("to-left");
-      later(() => previewPaper.classList.add("sequence-visible"), 210);
-      later(() => snapshot.classList.add("fade-out"), 300);
+      previous.classList.add("to-left");
+      later(() => next.classList.add("sequence-visible"), 210);
+      later(() => previous.classList.add("fade-out"), 300);
     }
-    later(clearPreviewTransition, 440);
+    later(() => clearPreviewTransition(state.format), 440);
   });
 }
 
@@ -164,7 +173,7 @@ function setFile(file) {
     deleteLogo.hidden = false;
     download.disabled = false;
     setStatus("");
-    updatePreview();
+    updatePreviews();
   };
   image.onerror = () => {
     URL.revokeObjectURL(url);
@@ -184,7 +193,7 @@ function removeLogo() {
   picker.textContent = "Choose logo";
   deleteLogo.hidden = true;
   setStatus("");
-  updatePreview();
+  updatePreviews();
 }
 
 function action(label, type, index) {
@@ -296,13 +305,13 @@ formatInputs.forEach((element) => element.addEventListener("change", () => {
   const previousFormat = state.format;
   const previousHeight = controls.getBoundingClientRect().height;
   const previousLayout = new Map([...controls.children].map((child) => [child, child.getBoundingClientRect().top]));
-  const snapshot = reducedMotion() ? null : (clearPreviewTransition(), previewPaper.cloneNode(true));
+  clearPreviewTransition(previousFormat);
   state.format = element.value;
   syncFlightSlots();
-  updatePreview();
+  previewLabel.textContent = FORMATS[state.format].label;
   animateControls(previousHeight);
   animateControlLayout(previousLayout);
-  animatePreview(previousFormat, snapshot);
+  animatePreview(previousFormat);
 }));
 
 picker.addEventListener("click", () => input.click());
@@ -331,7 +340,7 @@ fplSlots.addEventListener("click", (event) => {
   if (button.dataset.fplAction === "remove") {
     state.plans[index] = null;
     replaceFlightSlot(index);
-    updatePreview();
+    updatePreviews();
     return;
   }
   openFplDialog(index);
@@ -343,7 +352,7 @@ fplForm.addEventListener("submit", (event) => {
     state.plans[activePlan] = parseIcaoFlightPlan(fplInput.value);
     fplDialog.close();
     replaceFlightSlot(activePlan);
-    updatePreview();
+    updatePreviews();
   } catch (error) {
     fplError.textContent = error.message;
   }
@@ -363,4 +372,4 @@ download.addEventListener("click", () => {
 });
 
 renderFlightSlots();
-updatePreview();
+updatePreviews();
