@@ -129,6 +129,12 @@ function animatePreview(previousFormat, snapshot) {
   previewPaper.style.visibility = "hidden";
   const later = (action, delay) => previewTimeouts.push(setTimeout(() => transitionPaper === snapshot && action(), delay));
   void snapshot.offsetWidth;
+  if (previousFormat === "a4" && matchMedia("(pointer: coarse)").matches) {
+    previewPaper.style.visibility = "";
+    snapshot.classList.add("fade-out");
+    later(clearPreviewTransition, 240);
+    return;
+  }
   if (previousFormat === "a4") {
     snapshot.classList.add("hide-right");
     later(() => snapshot.classList.add("to-center"), 180);

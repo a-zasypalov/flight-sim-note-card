@@ -131,6 +131,8 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-transition.a4 { clip-path: inset(0); transform: translateX(0); }
 
+.preview-transition.fade-out { opacity: 0; transition: opacity .22s ease-out; }
+
 .preview-transition.a4.hide-right { clip-path: inset(0 50% 0 0); transition: clip-path .18s ease-out; }
 
 .preview-transition.a4.to-center { transform: translateX(25%); transition: transform .26s cubic-bezier(.22,.61,.36,1); }
