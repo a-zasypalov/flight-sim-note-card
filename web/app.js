@@ -346,6 +346,12 @@ fplSlots.addEventListener("click", (event) => {
   openFplDialog(index);
 });
 fplCancel.addEventListener("click", () => fplDialog.close());
+fplInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    fplForm.requestSubmit();
+  }
+});
 fplForm.addEventListener("submit", (event) => {
   event.preventDefault();
   try {

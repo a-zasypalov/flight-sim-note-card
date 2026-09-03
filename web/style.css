@@ -175,7 +175,7 @@ dialog::backdrop { background: rgb(25 31 38 / 46%); }
 
 .fpl-error { min-height: 18px; margin: 10px 0 0; color: #9d2525; font-size: .8rem; line-height: 1.4; }
 
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 
 .dialog-actions .download { width: auto; margin: 0; padding: 9px 14px; }
 
@@ -183,4 +183,5 @@ dialog::backdrop { background: rgb(25 31 38 / 46%); }
   .app-shell { padding: 28px 16px; }
   .app-grid { grid-template-columns: 1fr; }
   .preview-panel { order: -1; }
+  #fpl-input { font-size: 16px; }
 }
