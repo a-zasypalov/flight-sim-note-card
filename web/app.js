@@ -27,7 +27,6 @@ const state = { format: "a4", logo: null, url: null, plans: [null, null] };
 let activePlan = 0;
 let controlsTimeout;
 let controlLayoutTimeout;
-let fplSlotsTimeout;
 let transitionPaper;
 let previewTimeouts = [];
 
@@ -106,13 +105,6 @@ function animateControlLayout(before) {
     element.style.transform = "";
   });
   controlLayoutTimeout = setTimeout(clearControlLayoutMotion, 260);
-}
-
-function animateFplSlots() {
-  if (reducedMotion()) return;
-  clearTimeout(fplSlotsTimeout);
-  fplSlots.querySelectorAll(".fpl-slot").forEach((slot) => slot.classList.add("fpl-slot-enter"));
-  fplSlotsTimeout = setTimeout(() => fplSlots.querySelectorAll(".fpl-slot-enter").forEach((slot) => slot.classList.remove("fpl-slot-enter")), 240);
 }
 
 function animateControls(fromHeight) {
@@ -205,34 +197,41 @@ function action(label, type, index) {
   return button;
 }
 
+function flightSlot(index) {
+  const plan = state.plans[index];
+  const slot = document.createElement("section");
+  slot.className = `fpl-slot${plan ? "" : " fpl-slot-empty"}`;
+  const heading = document.createElement("h4");
+  heading.textContent = state.format === "a4" ? `card ${index ? "2" : "1"}` : "card 1";
+  const slotHeading = document.createElement("div");
+  slotHeading.className = "fpl-slot-heading";
+  slotHeading.append(heading);
+  if (!plan) {
+    slotHeading.append(action("Import ICAO FPL", "import", index));
+    slot.append(slotHeading);
+    return slot;
+  }
+  const summary = document.createElement("p");
+  summary.textContent = [plan.callsign, `${plan.origin} - ${plan.destination}`, plan.date].filter(Boolean).join(" · ");
+  const actions = document.createElement("div");
+  actions.className = "fpl-actions";
+  actions.append(action("Edit", "edit", index), action("Remove", "remove", index));
+  slot.append(slotHeading, summary, actions);
+  return slot;
+}
+
 function renderFlightSlots() {
   const indexes = state.format === "a4" ? [0, 1] : [0];
-  fplSlots.replaceChildren(...indexes.map((index) => {
-    const plan = state.plans[index];
-    const slot = document.createElement("section");
-    slot.className = `fpl-slot${plan ? "" : " fpl-slot-empty"}`;
-    const heading = document.createElement("h4");
-    heading.textContent = state.format === "a4" ? `card ${index ? "2" : "1"}` : "card 1";
-    const slotHeading = document.createElement("div");
-    slotHeading.className = "fpl-slot-heading";
-    slotHeading.append(heading);
-    if (!plan) {
-      slotHeading.append(action("Import ICAO FPL", "import", index));
-      slot.append(slotHeading);
-      return slot;
-    }
-    if (plan) {
-    const summary = document.createElement("p");
-    summary.textContent = [plan.callsign, `${plan.origin} - ${plan.destination}`, plan.date].filter(Boolean).join(" · ");
-    const actions = document.createElement("div");
-    actions.className = "fpl-actions";
-    actions.append(action("Edit", "edit", index), action("Remove", "remove", index));
-    slot.append(slotHeading, summary, actions);
-    } else {
-      slot.append(slotHeading)
-    }
-    return slot;
-  }));
+  fplSlots.replaceChildren(...indexes.map(flightSlot));
+}
+
+function syncFlightSlots() {
+  if (state.format === "a4" && fplSlots.children.length === 1) fplSlots.append(flightSlot(1));
+  if (state.format === "a5" && fplSlots.children.length > 1) fplSlots.lastElementChild.remove();
+}
+
+function replaceFlightSlot(index) {
+  fplSlots.children[index]?.replaceWith(flightSlot(index));
 }
 
 function openFplDialog(index) {
@@ -299,11 +298,10 @@ formatInputs.forEach((element) => element.addEventListener("change", () => {
   const previousLayout = new Map([...controls.children].map((child) => [child, child.getBoundingClientRect().top]));
   const snapshot = reducedMotion() ? null : (clearPreviewTransition(), previewPaper.cloneNode(true));
   state.format = element.value;
-  renderFlightSlots();
+  syncFlightSlots();
   updatePreview();
   animateControls(previousHeight);
   animateControlLayout(previousLayout);
-  animateFplSlots();
   animatePreview(previousFormat, snapshot);
 }));
 
@@ -332,7 +330,7 @@ fplSlots.addEventListener("click", (event) => {
   const index = Number(button.dataset.fplIndex);
   if (button.dataset.fplAction === "remove") {
     state.plans[index] = null;
-    renderFlightSlots();
+    replaceFlightSlot(index);
     updatePreview();
     return;
   }
@@ -344,7 +342,7 @@ fplForm.addEventListener("submit", (event) => {
   try {
     state.plans[activePlan] = parseIcaoFlightPlan(fplInput.value);
     fplDialog.close();
-    renderFlightSlots();
+    replaceFlightSlot(activePlan);
     updatePreview();
   } catch (error) {
     fplError.textContent = error.message;
