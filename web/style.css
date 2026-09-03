@@ -127,23 +127,21 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-paper { position: relative; height: 100%; }
 
-.preview-transition { position: absolute; z-index: 1; inset: 0; width: auto; height: 100%; margin: auto; pointer-events: none; will-change: clip-path, transform; }
+.preview-transition { position: absolute; z-index: 1; inset: 0; width: auto; height: 100%; margin: auto; pointer-events: none; will-change: opacity, transform; }
 
-.preview-transition.a4 { clip-path: inset(0); transform: translateX(0); }
-
-.preview-transition.fade-out { opacity: 0; transition: opacity .22s ease-out; }
-
-.preview-transition.a4.hide-right { clip-path: inset(0 50% 0 0); transition: clip-path .18s ease-out; }
-
-.preview-transition.a4.to-center { transform: translateX(25%); transition: transform .26s cubic-bezier(.22,.61,.36,1); }
+.preview-transition.fade-out { opacity: 0; transition: opacity .12s ease-out; }
 
 .preview-transition.a5 { transform: translateX(0); }
 
 .preview-transition.a5.to-left { transform: translateX(-50%); transition: transform .18s cubic-bezier(.22,.61,.36,1); }
 
-.preview-paper.revealing { clip-path: inset(0 50% 0 0); }
+.preview-paper.sequence-a4, .preview-paper.sequence-a5 { z-index: 2; opacity: 0; will-change: opacity, transform; }
 
-.preview-paper.revealing.revealed { clip-path: inset(0); transition: clip-path .1s ease-out; }
+.preview-paper.sequence-a5 { transform: translateX(-50%); }
+
+.preview-paper.sequence-visible { opacity: 1; transition: opacity .12s ease-out; }
+
+.preview-paper.sequence-a5.to-center { transform: translateX(0); transition: transform .18s cubic-bezier(.22,.61,.36,1); }
 
 .preview-paper.a4 { width: 100%; }
 

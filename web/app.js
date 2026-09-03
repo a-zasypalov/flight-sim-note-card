@@ -70,7 +70,7 @@ function clearPreviewTransition() {
   transitionPaper?.remove();
   transitionPaper = null;
   previewPaper.style.visibility = "";
-  previewPaper.classList.remove("revealing", "revealed");
+  previewPaper.classList.remove("sequence-a4", "sequence-a5", "sequence-visible", "to-center");
 }
 
 function clearControlsTransition() {
@@ -90,16 +90,21 @@ function clearControlLayoutMotion() {
 
 function animateControlLayout(before) {
   if (reducedMotion()) return;
+  const moving = [];
   for (const [element, top] of before) {
     const distance = top - element.getBoundingClientRect().top;
     if (!distance) continue;
     element.style.transition = "none";
     element.style.transform = `translateY(${distance}px)`;
-    void element.offsetHeight;
+    moving.push(element);
+  }
+  if (!moving.length) return;
+  void controls.offsetHeight;
+  moving.forEach((element) => {
     element.style.transition = "";
     element.classList.add("control-moving");
     element.style.transform = "";
-  }
+  });
   controlLayoutTimeout = setTimeout(clearControlLayoutMotion, 260);
 }
 
@@ -118,7 +123,7 @@ function animateControls(fromHeight) {
   controls.style.height = `${fromHeight}px`;
   void controls.offsetHeight;
   controls.style.height = `${toHeight}px`;
-  controlsTimeout = setTimeout(clearControlsTransition, 220);
+  controlsTimeout = setTimeout(clearControlsTransition, 260);
 }
 
 function animatePreview(previousFormat, snapshot) {
@@ -126,29 +131,22 @@ function animatePreview(previousFormat, snapshot) {
   snapshot.classList.add("preview-transition");
   transitionPaper = snapshot;
   previewFrame.append(snapshot);
-  previewPaper.style.visibility = "hidden";
   const later = (action, delay) => previewTimeouts.push(setTimeout(() => transitionPaper === snapshot && action(), delay));
-  void snapshot.offsetWidth;
-  if (previousFormat === "a4" && matchMedia("(pointer: coarse)").matches) {
-    previewPaper.style.visibility = "";
-    snapshot.classList.add("fade-out");
-    later(clearPreviewTransition, 240);
-    return;
-  }
-  if (previousFormat === "a4") {
-    snapshot.classList.add("hide-right");
-    later(() => snapshot.classList.add("to-center"), 180);
+  const start = (action) => requestAnimationFrame(() => requestAnimationFrame(() => transitionPaper === snapshot && action()));
+  if (previousFormat === "a4") previewPaper.classList.add("sequence-a5");
+  else previewPaper.classList.add("sequence-a4");
+  start(() => {
+    if (previousFormat === "a4") {
+      previewPaper.classList.add("sequence-visible");
+      later(() => snapshot.classList.add("fade-out"), 130);
+      later(() => previewPaper.classList.add("to-center"), 260);
+    } else {
+      snapshot.classList.add("to-left");
+      later(() => previewPaper.classList.add("sequence-visible"), 210);
+      later(() => snapshot.classList.add("fade-out"), 300);
+    }
     later(clearPreviewTransition, 440);
-  } else {
-    snapshot.classList.add("to-left");
-    later(() => {
-      previewPaper.classList.add("revealing");
-      previewPaper.style.visibility = "";
-      void previewPaper.offsetWidth;
-      previewPaper.classList.add("revealed");
-    }, 180);
-    later(clearPreviewTransition, 280);
-  }
+  });
 }
 
 function setStatus(message = "", error = false) {
@@ -214,7 +212,7 @@ function renderFlightSlots() {
     const slot = document.createElement("section");
     slot.className = `fpl-slot${plan ? "" : " fpl-slot-empty"}`;
     const heading = document.createElement("h4");
-    heading.textContent = state.format === "a4" ? `${index ? "Right" : "Left"} card` : "";
+    heading.textContent = state.format === "a4" ? `card ${index ? "2" : "1"}` : "card 1";
     const slotHeading = document.createElement("div");
     slotHeading.className = "fpl-slot-heading";
     slotHeading.append(heading);
