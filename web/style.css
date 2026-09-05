@@ -21,7 +21,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 h1 { display: flex; align-items: flex-end; gap: .16em; margin-bottom: 16px; margin-top: 8px; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.04em; }
 
-.app-icon { width: 3em; height: 3em; object-fit: contain; filter: drop-shadow(0 6px 6px rgb(20 40 60 / 70%)); margin-right: 8px; }
+.app-icon { box-sizing: content-box; width: 3em; height: 3em; padding: 8px; object-fit: contain; filter: drop-shadow(0 4px 4px rgb(20 40 60 / 70%)); margin: -8px 0 -8px -8px; }
 
 .app-title { transform: translateY(-.16em); }
 
