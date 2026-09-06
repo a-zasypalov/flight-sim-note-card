@@ -26,6 +26,7 @@
   --toggle-background: rgb(37 48 64 / 3%);
   --toggle-border: rgb(37 48 64 / 13%);
   --toggle-color: #6a737d;
+  --toggle-active: rgb(37 48 64 / 10%);
   color: var(--ink);
   background: var(--page);
   font-family: Arial, Helvetica, sans-serif;
@@ -60,6 +61,7 @@
   --toggle-background: rgb(237 242 247 / 4%);
   --toggle-border: rgb(237 242 247 / 14%);
   --toggle-color: #aeb9c7;
+  --toggle-active: rgb(237 242 247 / 10%);
 }
 
 * { box-sizing: border-box; }
@@ -82,15 +84,13 @@ h1 { display: flex; align-items: flex-end; gap: .16em; margin-bottom: 16px; marg
 
 .app-title { transform: translateY(-.16em); }
 
-.theme-toggle { position: fixed; z-index: 10; top: 16px; right: 18px; display: grid; width: 32px; height: 32px; padding: 0; place-items: center; border: 1px solid var(--toggle-border); background: var(--toggle-background); color: var(--toggle-color); opacity: .82; }
+.theme-toggle { position: absolute; z-index: 10; top: 16px; right: 18px; display: flex; gap: 2px; padding: 2px; border: 1px solid var(--toggle-border); border-radius: 7px; background: var(--toggle-background); color: var(--toggle-color); }
 
-.theme-icon { grid-area: 1 / 1; width: 16px; height: 16px; }
+.theme-toggle button { display: grid; width: 24px; height: 24px; padding: 0; place-items: center; border-radius: 5px; background: transparent; color: inherit; opacity: .58; }
 
-.theme-icon-sun { opacity: 0; transform: scale(.7); }
+.theme-toggle button[aria-pressed="true"] { background: var(--toggle-active); opacity: 1; }
 
-:root[data-theme="dark"] .theme-icon-sun { opacity: 1; transform: scale(1); }
-
-:root[data-theme="dark"] .theme-icon-moon { opacity: 0; transform: scale(.7); }
+.theme-icon { width: 14px; height: 14px; }
 
 h2 { margin-bottom: 22px; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; }
 

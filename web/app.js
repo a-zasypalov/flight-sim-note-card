@@ -19,12 +19,27 @@ const fplForm = document.querySelector("#fpl-form");
 const fplInput = document.querySelector("#fpl-input");
 const fplError = document.querySelector("#fpl-error");
 const fplCancel = document.querySelector("#fpl-cancel");
+const themeToggles = document.querySelectorAll(".theme-toggle button");
+const systemTheme = matchMedia("(prefers-color-scheme: dark)");
 const state = { format: "a4", logo: null, url: null, plans: [null, null] };
 let activePlan = 0;
 let controlsTimeout;
 let controlLayoutTimeout;
 let transitionPaper;
 let previewTimeouts = [];
+
+function setTheme(mode, save = false) {
+  const selected = mode === "light" || mode === "dark" ? mode : "auto";
+  document.documentElement.dataset.themeMode = selected;
+  document.documentElement.dataset.theme = selected === "auto" ? systemTheme.matches ? "dark" : "light" : selected;
+  themeToggles.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.themeMode === selected)));
+  if (save) {
+    try {
+      if (selected === "auto") localStorage.removeItem("pilot-notes-theme");
+      else localStorage.setItem("pilot-notes-theme", selected);
+    } catch {}
+  }
+}
 
 function updatePreview(format) {
   const paper = previewPapers[format];
@@ -314,6 +329,10 @@ formatInputs.forEach((element) => element.addEventListener("change", () => {
   animatePreview(previousFormat);
 }));
 
+themeToggles.forEach((button) => button.addEventListener("click", () => setTheme(button.dataset.themeMode, true)));
+systemTheme.addEventListener("change", () => {
+  if (document.documentElement.dataset.themeMode === "auto") setTheme("auto");
+});
 picker.addEventListener("click", () => input.click());
 deleteLogo.addEventListener("click", removeLogo);
 dropZone.addEventListener("click", () => input.click());
@@ -377,5 +396,6 @@ download.addEventListener("click", () => {
   });
 });
 
+setTheme(document.documentElement.dataset.themeMode);
 renderFlightSlots();
 updatePreviews();
