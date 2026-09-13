@@ -77,18 +77,18 @@ struct NoteView: View {
 
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    print("Todo: implement renaming")
+                    prepareExport()
                 } label: {
-                    Label("Rename", systemImage: "pencil")
+                    Label("Export PDF", systemImage: "square.and.arrow.up")
                 }
                 .disabled(note == nil || layout == nil)
             }
 
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    prepareExport()
+                    print("Todo: implement options")
                 } label: {
-                    Label("Export PDF", systemImage: "square.and.arrow.up")
+                    Label("Rename", systemImage: "ellipsis")
                 }
                 .disabled(note == nil || layout == nil)
             }

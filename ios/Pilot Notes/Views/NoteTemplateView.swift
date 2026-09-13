@@ -76,6 +76,7 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
         pdfView.pageOverlayViewProvider = context.coordinator
         pdfView.document = PDFDocument(url: pdfURL)
         pdfView.autoScales = true
+        context.coordinator.observeZoomGesture(in: pdfView)
         return pdfView
     }
 
@@ -83,12 +84,35 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
         context.coordinator.update(self)
     }
 
+    static func dismantleUIView(_ pdfView: PDFView, coordinator: Coordinator) {
+        coordinator.stopObservingZoomGesture()
+    }
+
     final class Coordinator: NSObject, PDFPageOverlayViewProvider {
         private var parent: PDFNoteTemplateView
+        private weak var pdfView: PDFView?
+        private weak var pinchGestureRecognizer: UIPinchGestureRecognizer?
         private var overlayView: NoteEditorOverlayView?
 
         init(_ parent: PDFNoteTemplateView) {
             self.parent = parent
+        }
+
+        func observeZoomGesture(in pdfView: PDFView) {
+            self.pdfView = pdfView
+            guard
+                let pinchGestureRecognizer = scrollView(in: pdfView)?.pinchGestureRecognizer,
+                pinchGestureRecognizer !== self.pinchGestureRecognizer
+            else { return }
+
+            stopObservingZoomGesture()
+            self.pinchGestureRecognizer = pinchGestureRecognizer
+            pinchGestureRecognizer.addTarget(self, action: #selector(zoomGestureChanged(_:)))
+        }
+
+        func stopObservingZoomGesture() {
+            pinchGestureRecognizer?.removeTarget(self, action: #selector(zoomGestureChanged(_:)))
+            pinchGestureRecognizer = nil
         }
 
         func update(_ parent: PDFNoteTemplateView) {
@@ -106,6 +130,7 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
         }
 
         func pdfView(_ pdfView: PDFView, overlayViewFor page: PDFPage) -> UIView? {
+            observeZoomGesture(in: pdfView)
             pdfView.documentView?.subviews.forEach { $0.isUserInteractionEnabled = true }
             let overlayView = NoteEditorOverlayView(
                 layout: parent.layout,
@@ -120,7 +145,27 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
                 onDropLogo: parent.onDropLogo
             )
             self.overlayView = overlayView
+            updateContentScale(for: pdfView)
             return overlayView
+        }
+
+        @objc private func zoomGestureChanged(_ gesture: UIPinchGestureRecognizer) {
+            guard [.ended, .cancelled, .failed].contains(gesture.state) else { return }
+            guard let pdfView else { return }
+            updateContentScale(for: pdfView)
+        }
+
+        private func updateContentScale(for pdfView: PDFView) {
+            overlayView?.updateContentScale(
+                pdfView.traitCollection.displayScale * pdfView.scaleFactor
+            )
+        }
+
+        private func scrollView(in view: UIView) -> UIScrollView? {
+            if let scrollView = view as? UIScrollView {
+                return scrollView
+            }
+            return view.subviews.lazy.compactMap { self.scrollView(in: $0) }.first
         }
     }
 }
@@ -134,6 +179,8 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     private var onFieldChange: (NoteLayoutField.ID, String) -> Void
     private var onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     private var onEditingChange: (Bool) -> Void
+    private var currentContentScale: CGFloat = 1
+    private var isContentScaleUpdateScheduled = false
 
     init(
         layout: NoteLayout,
@@ -246,20 +293,33 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         self.onFieldChange = onFieldChange
         self.onWritingRegionChange = onWritingRegionChange
         self.onEditingChange = onEditingChange
+        var textChanged = false
 
         for (index, textField) in fieldViews.enumerated() where !textField.isFirstResponder {
             let field = layout.fields[index]
-            textField.text = displayed(fieldValues[field.id] ?? "", for: field)
+            let text = displayed(fieldValues[field.id] ?? "", for: field)
+            if textField.text != text {
+                textField.text = text
+                textChanged = true
+            }
         }
 
         for (index, textView) in writingRegionViews.enumerated() where !textView.isFirstResponder {
             let region = layout.writingRegions[index]
-            setWritingText(writingRegionValues[region.id] ?? "", in: textView, for: region)
+            let text = writingRegionValues[region.id] ?? ""
+            if textView.text != text {
+                setWritingText(text, in: textView, for: region)
+                textChanged = true
+            }
         }
 
         logoView?.onTap = onPickLogo
         logoView?.onDrop = onDropLogo
         logoView?.setImage(data: logoData)
+
+        if textChanged {
+            scheduleContentScaleUpdate()
+        }
     }
 
     @objc private func fieldChanged(_ textField: UITextField) {
@@ -278,18 +338,22 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         onEditingChange(true)
+        scheduleContentScaleUpdate()
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         onEditingChange(false)
+        scheduleContentScaleUpdate()
     }
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         onEditingChange(true)
+        scheduleContentScaleUpdate()
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
         onEditingChange(false)
+        scheduleContentScaleUpdate()
     }
 
     @objc private func hideKeyboard() {
@@ -322,6 +386,33 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         textView.textContainer.lineFragmentPadding = 0
         textView.attributedText = NSAttributedString(string: value, attributes: attributes)
         textView.typingAttributes = attributes
+    }
+
+    func updateContentScale(_ scale: CGFloat) {
+        currentContentScale = scale
+        for view in fieldViews {
+            updateContentScale(scale, in: view)
+        }
+        for view in writingRegionViews {
+            updateContentScale(scale, in: view)
+        }
+    }
+
+    private func updateContentScale(_ scale: CGFloat, in view: UIView) {
+        view.contentScaleFactor = scale
+        view.layer.contentsScale = scale
+        view.setNeedsDisplay()
+        view.subviews.forEach { updateContentScale(scale, in: $0) }
+    }
+
+    private func scheduleContentScaleUpdate() {
+        guard !isContentScaleUpdateScheduled else { return }
+        isContentScaleUpdateScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            isContentScaleUpdateScheduled = false
+            updateContentScale(currentContentScale)
+        }
     }
 
     private func normalized(_ value: String, for field: NoteLayoutField) -> String {
