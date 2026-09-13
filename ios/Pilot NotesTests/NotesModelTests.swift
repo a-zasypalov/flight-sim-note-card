@@ -45,6 +45,7 @@ struct NotesModelTests {
         #expect(layout.logoFrame == LayoutRect(x: 5.5, y: 188.5, width: 38, height: 9))
         #expect(layout.fields.count == 30)
         #expect(layout.writingRegions.map(\.id) == ["pushbackTaxi", "inFlight", "arrivalTaxi"])
+        #expect(layout.writingRegions.map(\.baselineSpacing) == [6, 6, 6])
         #expect(layout.pdfURL != nil)
     }
 
@@ -54,10 +55,12 @@ struct NotesModelTests {
         let id = try #require(model.createNote(named: "Flight", layout: .vatsimFlightCard))
 
         model.setField("callsign", to: "DLH123", in: id)
+        model.setWritingRegion("inFlight", to: "Direct KERAX", in: id)
         model.setLogo(Data([1, 2, 3]), in: id)
 
         let note = try #require(model.note(id: id))
         #expect(note.content.fieldValues["callsign"] == "DLH123")
+        #expect(note.content.writingRegionValues["inFlight"] == "Direct KERAX")
         #expect(note.content.logoData == Data([1, 2, 3]))
     }
 
@@ -65,11 +68,13 @@ struct NotesModelTests {
     func exportsPDF() throws {
         var note = Note(name: "Flight", layout: .vatsimFlightCard)
         note.content.fieldValues["callsign"] = "DLH123"
+        note.content.writingRegionValues["inFlight"] = "Direct KERAX"
 
         let document = try NotePDFExporter.document(for: note, layout: .vatsimFlightCard)
         let pdf = try #require(PDFDocument(data: document.data))
 
         #expect(pdf.pageCount == 1)
         #expect(pdf.page(at: 0)?.string?.contains("DLH123") == true)
+        #expect(pdf.page(at: 0)?.string?.contains("Direct KERAX") == true)
     }
 }

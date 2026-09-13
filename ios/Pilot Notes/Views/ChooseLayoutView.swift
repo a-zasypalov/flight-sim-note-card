@@ -68,6 +68,11 @@ struct ChooseLayoutView: View {
                     .disabled(!canCreate)
                 }
             }
+            .onAppear {
+                if selectedLayoutID == nil {
+                    selectedLayoutID = layouts.first?.id
+                }
+            }
         }
     }
 }

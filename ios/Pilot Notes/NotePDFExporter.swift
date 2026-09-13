@@ -48,6 +48,7 @@ enum NotePDFExporter {
             graphicsContext.restoreGState()
 
             drawLogo(note.content.logoData, layout: layout, pageBounds: pageBounds)
+            drawWritingRegions(note.content.writingRegionValues, layout: layout, pageBounds: pageBounds)
             drawFields(note.content.fieldValues, layout: layout, pageBounds: pageBounds)
         }
 
@@ -73,6 +74,40 @@ enum NotePDFExporter {
             height: size.height
         )
         image.draw(in: imageFrame)
+    }
+
+    private static func drawWritingRegions(
+        _ values: [NoteLayoutRegion.ID: String],
+        layout: NoteLayout,
+        pageBounds: CGRect
+    ) {
+        let scale = pageBounds.height / CGFloat(layout.pageSize.height)
+
+        for region in layout.writingRegions {
+            guard let value = values[region.id], !value.isEmpty else { continue }
+            let fontSize = CGFloat(region.fontSize ?? 8.5)
+            let font = UIFont(name: "Courier", size: fontSize)
+                ?? UIFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+            let paragraph = NSMutableParagraphStyle()
+            paragraph.lineBreakMode = .byWordWrapping
+            paragraph.lineSpacing = max(0, CGFloat(region.baselineSpacing) * scale - font.lineHeight)
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor(white: 0.16, alpha: 1),
+                .paragraphStyle: paragraph
+            ]
+            let regionFrame = layout.pageRect(for: region.frame, in: pageBounds)
+            let top = regionFrame.minY
+                + CGFloat(region.firstBaselineOffset) * scale
+                - font.ascender
+            let frame = CGRect(
+                x: regionFrame.minX + scale,
+                y: top,
+                width: regionFrame.width - 2 * scale,
+                height: regionFrame.maxY - top
+            )
+            (value as NSString).draw(in: frame, withAttributes: attributes)
+        }
     }
 
     private static func drawFields(

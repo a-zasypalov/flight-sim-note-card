@@ -6,3 +6,4 @@ web/dist/
 web/public/templates/*.aux
 web/public/templates/*.log
 .DS_Store
+**/xcuserdata/

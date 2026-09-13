@@ -73,6 +73,9 @@ struct NoteLayoutRegion: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let label: String
     let frame: LayoutRect
+    let firstBaselineOffset: Double
+    let baselineSpacing: Double
+    let fontSize: Double?
 }
 
 struct LayoutSize: Codable, Hashable, Sendable {

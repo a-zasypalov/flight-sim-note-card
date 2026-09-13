@@ -1,14 +1,69 @@
 import PDFKit
 import SwiftUI
 
-struct NoteTemplateView: UIViewRepresentable {
+struct NoteTemplateView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var isEditing = false
+
     let layout: NoteLayout
     let pdfURL: URL
     let fieldValues: [NoteLayoutField.ID: String]
+    let writingRegionValues: [NoteLayoutRegion.ID: String]
     let logoData: Data?
     let onFieldChange: (NoteLayoutField.ID, String) -> Void
+    let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     let onPickLogo: () -> Void
     let onDropLogo: (UIImage) -> Void
+
+    var body: some View {
+        PDFNoteTemplateView(
+            layout: layout,
+            pdfURL: pdfURL,
+            fieldValues: fieldValues,
+            writingRegionValues: writingRegionValues,
+            logoData: logoData,
+            onFieldChange: onFieldChange,
+            onWritingRegionChange: onWritingRegionChange,
+            onPickLogo: onPickLogo,
+            onDropLogo: onDropLogo,
+            onEditingChange: { isEditing = $0 }
+        )
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if isEditing {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "checkmark")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PNColors.accentColor)
+                .accessibilityLabel(isEditing ? "Hide keyboard" : "Back")
+            }
+        }
+    }
+}
+
+private struct PDFNoteTemplateView: UIViewRepresentable {
+    let layout: NoteLayout
+    let pdfURL: URL
+    let fieldValues: [NoteLayoutField.ID: String]
+    let writingRegionValues: [NoteLayoutRegion.ID: String]
+    let logoData: Data?
+    let onFieldChange: (NoteLayoutField.ID, String) -> Void
+    let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
+    let onPickLogo: () -> Void
+    let onDropLogo: (UIImage) -> Void
+    let onEditingChange: (Bool) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -29,31 +84,38 @@ struct NoteTemplateView: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, PDFPageOverlayViewProvider {
-        private var parent: NoteTemplateView
+        private var parent: PDFNoteTemplateView
         private var overlayView: NoteEditorOverlayView?
 
-        init(_ parent: NoteTemplateView) {
+        init(_ parent: PDFNoteTemplateView) {
             self.parent = parent
         }
 
-        func update(_ parent: NoteTemplateView) {
+        func update(_ parent: PDFNoteTemplateView) {
             self.parent = parent
             overlayView?.update(
                 fieldValues: parent.fieldValues,
+                writingRegionValues: parent.writingRegionValues,
                 logoData: parent.logoData,
                 onFieldChange: parent.onFieldChange,
+                onWritingRegionChange: parent.onWritingRegionChange,
+                onEditingChange: parent.onEditingChange,
                 onPickLogo: parent.onPickLogo,
                 onDropLogo: parent.onDropLogo
             )
         }
 
         func pdfView(_ pdfView: PDFView, overlayViewFor page: PDFPage) -> UIView? {
+            pdfView.documentView?.subviews.forEach { $0.isUserInteractionEnabled = true }
             let overlayView = NoteEditorOverlayView(
                 layout: parent.layout,
                 pageBounds: page.bounds(for: .mediaBox),
                 fieldValues: parent.fieldValues,
+                writingRegionValues: parent.writingRegionValues,
                 logoData: parent.logoData,
                 onFieldChange: parent.onFieldChange,
+                onWritingRegionChange: parent.onWritingRegionChange,
+                onEditingChange: parent.onEditingChange,
                 onPickLogo: parent.onPickLogo,
                 onDropLogo: parent.onDropLogo
             )
@@ -63,25 +125,52 @@ struct NoteTemplateView: UIViewRepresentable {
     }
 }
 
-private final class NoteEditorOverlayView: UIView, UITextFieldDelegate {
+private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextViewDelegate {
     private let layout: NoteLayout
+    private let pageBounds: CGRect
     private var fieldViews: [UITextField] = []
+    private var writingRegionViews: [UITextView] = []
     private var logoView: LogoDropView?
     private var onFieldChange: (NoteLayoutField.ID, String) -> Void
+    private var onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
+    private var onEditingChange: (Bool) -> Void
 
     init(
         layout: NoteLayout,
         pageBounds: CGRect,
         fieldValues: [NoteLayoutField.ID: String],
+        writingRegionValues: [NoteLayoutRegion.ID: String],
         logoData: Data?,
         onFieldChange: @escaping (NoteLayoutField.ID, String) -> Void,
+        onWritingRegionChange: @escaping (NoteLayoutRegion.ID, String) -> Void,
+        onEditingChange: @escaping (Bool) -> Void,
         onPickLogo: @escaping () -> Void,
         onDropLogo: @escaping (UIImage) -> Void
     ) {
         self.layout = layout
+        self.pageBounds = pageBounds
         self.onFieldChange = onFieldChange
+        self.onWritingRegionChange = onWritingRegionChange
+        self.onEditingChange = onEditingChange
         super.init(frame: pageBounds)
         backgroundColor = .clear
+
+        for (index, region) in layout.writingRegions.enumerated() {
+            let textView = UITextView(frame: layout.pageRect(for: region.frame, in: pageBounds))
+            textView.tag = index
+            setWritingText(writingRegionValues[region.id] ?? "", in: textView, for: region)
+            textView.backgroundColor = .clear
+            textView.isScrollEnabled = false
+            textView.autocorrectionType = .no
+            textView.spellCheckingType = .no
+            textView.smartDashesType = .no
+            textView.smartQuotesType = .no
+            textView.keyboardType = .asciiCapable
+            textView.accessibilityLabel = region.label
+            textView.delegate = self
+            writingRegionViews.append(textView)
+            addSubview(textView)
+        }
 
         for (index, field) in layout.fields.enumerated() {
             let fieldFrame = layout.pageRect(for: field.frame, in: pageBounds)
@@ -134,18 +223,38 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        for subview in subviews.reversed() {
+            let convertedPoint = subview.convert(point, from: self)
+            if let hitView = subview.hitTest(convertedPoint, with: event) {
+                return hitView
+            }
+        }
+        return nil
+    }
+
     func update(
         fieldValues: [NoteLayoutField.ID: String],
+        writingRegionValues: [NoteLayoutRegion.ID: String],
         logoData: Data?,
         onFieldChange: @escaping (NoteLayoutField.ID, String) -> Void,
+        onWritingRegionChange: @escaping (NoteLayoutRegion.ID, String) -> Void,
+        onEditingChange: @escaping (Bool) -> Void,
         onPickLogo: @escaping () -> Void,
         onDropLogo: @escaping (UIImage) -> Void
     ) {
         self.onFieldChange = onFieldChange
+        self.onWritingRegionChange = onWritingRegionChange
+        self.onEditingChange = onEditingChange
 
         for (index, textField) in fieldViews.enumerated() where !textField.isFirstResponder {
             let field = layout.fields[index]
             textField.text = displayed(fieldValues[field.id] ?? "", for: field)
+        }
+
+        for (index, textView) in writingRegionViews.enumerated() where !textView.isFirstResponder {
+            let region = layout.writingRegions[index]
+            setWritingText(writingRegionValues[region.id] ?? "", in: textView, for: region)
         }
 
         logoView?.onTap = onPickLogo
@@ -163,6 +272,58 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate {
         onFieldChange(field.id, value)
     }
 
+    func textViewDidChange(_ textView: UITextView) {
+        onWritingRegionChange(layout.writingRegions[textView.tag].id, textView.text)
+    }
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        onEditingChange(true)
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        onEditingChange(false)
+    }
+
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        onEditingChange(true)
+    }
+
+    func textViewDidEndEditing(_ textView: UITextView) {
+        onEditingChange(false)
+    }
+
+    @objc private func hideKeyboard() {
+        endEditing(true)
+    }
+
+    private func setWritingText(
+        _ value: String,
+        in textView: UITextView,
+        for region: NoteLayoutRegion
+    ) {
+        let scale = pageBounds.height / CGFloat(layout.pageSize.height)
+        let fontSize = CGFloat(region.fontSize ?? 8.5)
+        let font = UIFont(name: "Courier", size: fontSize)
+            ?? UIFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = max(0, CGFloat(region.baselineSpacing) * scale - font.lineHeight)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor(white: 0.16, alpha: 1),
+            .paragraphStyle: paragraph
+        ]
+
+        textView.textContainerInset = UIEdgeInsets(
+            top: max(0, CGFloat(region.firstBaselineOffset) * scale - font.ascender),
+            left: scale,
+            bottom: 0,
+            right: scale
+        )
+        textView.textContainer.lineFragmentPadding = 0
+        textView.attributedText = NSAttributedString(string: value, attributes: attributes)
+        textView.typingAttributes = attributes
+    }
+
     private func normalized(_ value: String, for field: NoteLayoutField) -> String {
         if field.format == .frequency {
             return String(value.filter(\.isNumber).prefix(6))
@@ -173,7 +334,7 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate {
     private func displayed(_ value: String, for field: NoteLayoutField) -> String {
         guard field.format == .frequency, value.count > 3 else { return value }
         let splitIndex = value.index(value.startIndex, offsetBy: 3)
-        return "\(value[..<splitIndex]).\(value[splitIndex...])"
+        return "\(value[..<splitIndex]) \(value[splitIndex...])"
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

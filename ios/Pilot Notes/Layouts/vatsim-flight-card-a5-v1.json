@@ -204,17 +204,26 @@
     {
       "id": "pushbackTaxi",
       "label": "Pushback and departure taxi",
-      "frame": { "x": 4, "y": 123, "width": 130, "height": 19 }
+      "frame": { "x": 4, "y": 123, "width": 130, "height": 19 },
+      "firstBaselineOffset": 6.5,
+      "baselineSpacing": 6,
+      "fontSize": 8.5
     },
     {
       "id": "inFlight",
       "label": "In-flight notes",
-      "frame": { "x": 4, "y": 50, "width": 130, "height": 68 }
+      "frame": { "x": 4, "y": 50, "width": 130, "height": 68 },
+      "firstBaselineOffset": 7.5,
+      "baselineSpacing": 6,
+      "fontSize": 8.5
     },
     {
       "id": "arrivalTaxi",
       "label": "Arrival taxi",
-      "frame": { "x": 4, "y": 4, "width": 130, "height": 19 }
+      "frame": { "x": 4, "y": 4, "width": 130, "height": 19 },
+      "firstBaselineOffset": 7.5,
+      "baselineSpacing": 6,
+      "fontSize": 8.5
     }
   ]
 }

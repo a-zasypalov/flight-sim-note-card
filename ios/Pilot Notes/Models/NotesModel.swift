@@ -34,6 +34,16 @@ final class NotesModel {
         }
     }
 
+    func setWritingRegion(_ regionID: NoteLayoutRegion.ID, to value: String, in noteID: Note.ID) {
+        guard let index = notes.firstIndex(where: { $0.id == noteID }) else { return }
+
+        if value.isEmpty {
+            notes[index].content.writingRegionValues.removeValue(forKey: regionID)
+        } else {
+            notes[index].content.writingRegionValues[regionID] = value
+        }
+    }
+
     func setLogo(_ data: Data?, in noteID: Note.ID) {
         guard let index = notes.firstIndex(where: { $0.id == noteID }) else { return }
         notes[index].content.logoData = data

@@ -23,5 +23,6 @@ struct Note: Identifiable, Hashable, Sendable {
 
 struct NoteContent: Hashable, Sendable {
     var fieldValues: [NoteLayoutField.ID: String] = [:]
+    var writingRegionValues: [NoteLayoutRegion.ID: String] = [:]
     var logoData: Data?
 }

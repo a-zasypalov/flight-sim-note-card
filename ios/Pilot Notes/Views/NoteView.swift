@@ -36,9 +36,13 @@ struct NoteView: View {
                     layout: layout,
                     pdfURL: pdfURL,
                     fieldValues: note.content.fieldValues,
+                    writingRegionValues: note.content.writingRegionValues,
                     logoData: note.content.logoData,
                     onFieldChange: { fieldID, value in
                         notesModel.setField(fieldID, to: value, in: noteID)
+                    },
+                    onWritingRegionChange: { regionID, value in
+                        notesModel.setWritingRegion(regionID, to: value, in: noteID)
                     },
                     onPickLogo: {
                         isChoosingLogoSource = true
@@ -54,6 +58,8 @@ struct NoteView: View {
                 )
             }
         }
+        .ignoresSafeArea(.container, edges: [.top, .bottom])
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle(note?.name ?? "Note")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -86,6 +92,7 @@ struct NoteView: View {
                 }
                 .disabled(note == nil || layout == nil)
             }
+
         }
         .confirmationDialog("Logo", isPresented: $isChoosingLogoSource) {
             Button("Photo Library") {
