@@ -1,0 +1,207 @@
+{
+  "id": "vatsim-flight-card",
+  "revision": 1,
+  "name": "VATSIM Flight Card",
+  "pdfResource": "vatsim-flight-card-a5-v1",
+  "pageSize": { "width": 148, "height": 210 },
+  "cardFrame": { "x": 5, "y": 5, "width": 138, "height": 200 },
+  "fields": [
+    {
+      "id": "callsign",
+      "label": "Callsign",
+      "frame": { "x": 47, "y": 189, "width": 30.45, "height": 8 },
+      "alignment": "trailing"
+    },
+    {
+      "id": "aircraft",
+      "label": "Aircraft",
+      "frame": { "x": 77.45, "y": 189, "width": 30.45, "height": 8 },
+      "alignment": "trailing"
+    },
+    {
+      "id": "date",
+      "label": "Date",
+      "frame": { "x": 107.9, "y": 189, "width": 26.1, "height": 8 },
+      "alignment": "trailing"
+    },
+    {
+      "id": "departureStand",
+      "label": "Departure stand",
+      "frame": { "x": 4, "y": 177, "width": 28, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "origin",
+      "label": "Origin",
+      "frame": { "x": 32, "y": 177, "width": 40, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "destination",
+      "label": "Destination",
+      "frame": { "x": 72, "y": 177, "width": 40, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "alternate",
+      "label": "Alternate",
+      "frame": { "x": 112, "y": 177, "width": 22, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureAtisFrequency",
+      "label": "Departure ATIS frequency",
+      "frame": { "x": 4, "y": 162, "width": 23.4, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureAtisInfo",
+      "label": "Departure ATIS information",
+      "frame": { "x": 27.4, "y": 162, "width": 9.1, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureQnh",
+      "label": "Departure QNH",
+      "frame": { "x": 36.5, "y": 162, "width": 23.4, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "clearanceDeliveryFrequency",
+      "label": "Clearance delivery frequency",
+      "frame": { "x": 59.9, "y": 162, "width": 26, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "squawk",
+      "label": "Squawk",
+      "frame": { "x": 85.9, "y": 162, "width": 23.4, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureRunway",
+      "label": "Departure runway",
+      "frame": { "x": 109.3, "y": 162, "width": 24.7, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "sid",
+      "label": "SID",
+      "frame": { "x": 4, "y": 152, "width": 32.5, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "initialClimb",
+      "label": "Initial climb",
+      "frame": { "x": 36.5, "y": 152, "width": 32.5, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "transitionAltitude",
+      "label": "Transition altitude",
+      "frame": { "x": 69, "y": 152, "width": 32.5, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "cruiseAltitude",
+      "label": "Cruise altitude",
+      "frame": { "x": 101.5, "y": 152, "width": 32.5, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureGroundFrequency",
+      "label": "Departure ground frequency",
+      "frame": { "x": 4, "y": 142, "width": 43.329, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureTowerFrequency",
+      "label": "Departure tower frequency",
+      "frame": { "x": 47.329, "y": 142, "width": 43.329, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "departureFrequency",
+      "label": "Departure frequency",
+      "frame": { "x": 90.658, "y": 142, "width": 43.342, "height": 10 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalAtisFrequency",
+      "label": "Arrival ATIS frequency",
+      "frame": { "x": 4, "y": 34, "width": 19.656, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalAtisCode",
+      "label": "Arrival ATIS code",
+      "frame": { "x": 23.656, "y": 34, "width": 7.644, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalQnh",
+      "label": "Arrival QNH",
+      "frame": { "x": 31.3, "y": 34, "width": 13, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "transitionLevel",
+      "label": "Transition level",
+      "frame": { "x": 44.3, "y": 34, "width": 19.5, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalRunway",
+      "label": "Arrival runway",
+      "frame": { "x": 63.8, "y": 34, "width": 16.9, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "star",
+      "label": "STAR",
+      "frame": { "x": 80.7, "y": 34, "width": 53.3, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalFrequency",
+      "label": "Arrival frequency",
+      "frame": { "x": 4, "y": 23, "width": 43.329, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalTowerFrequency",
+      "label": "Arrival tower frequency",
+      "frame": { "x": 47.329, "y": 23, "width": 43.329, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalGroundFrequency",
+      "label": "Arrival ground frequency",
+      "frame": { "x": 90.658, "y": 23, "width": 43.342, "height": 11 },
+      "alignment": "center"
+    },
+    {
+      "id": "arrivalStand",
+      "label": "Arrival stand",
+      "frame": { "x": 106, "y": 4, "width": 28, "height": 11 },
+      "alignment": "center"
+    }
+  ],
+  "writingRegions": [
+    {
+      "id": "pushbackTaxi",
+      "label": "Pushback and departure taxi",
+      "frame": { "x": 4, "y": 123, "width": 130, "height": 19 }
+    },
+    {
+      "id": "inFlight",
+      "label": "In-flight notes",
+      "frame": { "x": 4, "y": 50, "width": 130, "height": 68 }
+    },
+    {
+      "id": "arrivalTaxi",
+      "label": "Arrival taxi",
+      "frame": { "x": 4, "y": 4, "width": 130, "height": 19 }
+    }
+  ]
+}

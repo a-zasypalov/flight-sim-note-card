@@ -22,17 +22,3 @@ struct Note: Identifiable, Hashable, Sendable {
 }
 
 struct NoteContent: Hashable, Sendable {}
-
-struct NoteLayout: Identifiable, Hashable, Sendable {
-    let id: String
-    let revision: Int
-    let name: String
-
-    static let placeholder = NoteLayout(
-        id: "placeholder",
-        revision: 1,
-        name: "Placeholder layout"
-    )
-
-    static let available = [placeholder]
-}

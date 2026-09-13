@@ -5,12 +5,14 @@
 - `latex/` is the canonical blank-card design. `vatsim-flight-card-layout.tex` is the shared layout; the A4 and A5 files prepare its final pages.
 - `web/` is a static, browser-only Vite app. It adds user logos and imported ICAO FPL values to the generated vector PDFs locally.
 - `ios/` is the native SwiftUI app for iPhone and iPad. It models an editable note as content tied to a stable layout ID and revision; the current foundation keeps notes in memory.
+- `ios/Pilot Notes/Layouts/` contains versioned PDF backgrounds and their card-local geometry manifests. Published revisions are immutable because notes retain their layout ID and revision.
 - `web/public/templates/` contains generated, tracked PDFs and preview PNGs. Do not edit these files by hand.
 - `web/templates.js` must stay aligned with the LaTeX card geometry because it places web preview and PDF overlays.
 
 ## Workflow
 
 - After changing the LaTeX card layout, run `sh latex/build-web-templates.sh` from the repository root to refresh `web/public/templates/`.
+- When a LaTeX change should reach the native app, add a new native layout revision and preserve every existing revision.
 - For web changes, run `cd web && npm run check && npm run build`.
 - For native changes, build and test the `Pilot Notes` scheme in `ios/Pilot Notes.xcodeproj` for an iOS Simulator.
 - Cloudflare Pages uses `web` as the root directory, `npm run build` as the build command, and `dist` as the output directory.

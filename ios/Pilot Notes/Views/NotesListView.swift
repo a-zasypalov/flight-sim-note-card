@@ -36,7 +36,7 @@ struct NotesListView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 4)
                 }
-                .buttonStyle(.glass(.clear.tint(Color(red: 53.0 / 255, green: 122.0 / 255, blue: 205.0 / 255))))
+                .buttonStyle(.glass(.clear.tint(PNColors.accentColor)))
                 .buttonBorderShape(.capsule)
                 .accessibilityLabel("Add note")
                 .padding()
@@ -70,7 +70,7 @@ struct NotesListView: View {
 #Preview("Notes") {
     NotesListView()
         .environment(NotesModel(notes: [
-            Note(name: "EDDL to EDDM", layout: .placeholder),
-            Note(name: "Evening flight", layout: .placeholder)
+            Note(name: "EDDL to EDDM", layout: .vatsimFlightCard),
+            Note(name: "Evening flight", layout: .vatsimFlightCard)
         ]))
 }
