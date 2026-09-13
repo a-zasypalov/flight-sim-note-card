@@ -5,24 +5,28 @@
   "pdfResource": "vatsim-flight-card-a5-v1",
   "pageSize": { "width": 148, "height": 210 },
   "cardFrame": { "x": 5, "y": 5, "width": 138, "height": 200 },
+  "logoFrame": { "x": 5.5, "y": 188.5, "width": 38, "height": 9 },
   "fields": [
     {
       "id": "callsign",
       "label": "Callsign",
       "frame": { "x": 47, "y": 189, "width": 30.45, "height": 8 },
-      "alignment": "trailing"
+      "alignment": "trailing",
+      "fontSize": 8.5
     },
     {
       "id": "aircraft",
       "label": "Aircraft",
       "frame": { "x": 77.45, "y": 189, "width": 30.45, "height": 8 },
-      "alignment": "trailing"
+      "alignment": "trailing",
+      "fontSize": 8.5
     },
     {
       "id": "date",
       "label": "Date",
       "frame": { "x": 107.9, "y": 189, "width": 26.1, "height": 8 },
-      "alignment": "trailing"
+      "alignment": "trailing",
+      "fontSize": 8.5
     },
     {
       "id": "departureStand",
@@ -52,7 +56,8 @@
       "id": "departureAtisFrequency",
       "label": "Departure ATIS frequency",
       "frame": { "x": 4, "y": 162, "width": 23.4, "height": 10 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "departureAtisInfo",
@@ -70,7 +75,8 @@
       "id": "clearanceDeliveryFrequency",
       "label": "Clearance delivery frequency",
       "frame": { "x": 59.9, "y": 162, "width": 26, "height": 10 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "squawk",
@@ -112,25 +118,29 @@
       "id": "departureGroundFrequency",
       "label": "Departure ground frequency",
       "frame": { "x": 4, "y": 142, "width": 43.329, "height": 10 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "departureTowerFrequency",
       "label": "Departure tower frequency",
       "frame": { "x": 47.329, "y": 142, "width": 43.329, "height": 10 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "departureFrequency",
       "label": "Departure frequency",
       "frame": { "x": 90.658, "y": 142, "width": 43.342, "height": 10 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "arrivalAtisFrequency",
       "label": "Arrival ATIS frequency",
       "frame": { "x": 4, "y": 34, "width": 19.656, "height": 11 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "arrivalAtisCode",
@@ -166,19 +176,22 @@
       "id": "arrivalFrequency",
       "label": "Arrival frequency",
       "frame": { "x": 4, "y": 23, "width": 43.329, "height": 11 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "arrivalTowerFrequency",
       "label": "Arrival tower frequency",
       "frame": { "x": 47.329, "y": 23, "width": 43.329, "height": 11 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "arrivalGroundFrequency",
       "label": "Arrival ground frequency",
       "frame": { "x": 90.658, "y": 23, "width": 43.342, "height": 11 },
-      "alignment": "center"
+      "alignment": "center",
+      "format": "frequency"
     },
     {
       "id": "arrivalStand",

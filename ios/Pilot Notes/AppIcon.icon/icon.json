@@ -19,6 +19,20 @@
     {
       "layers" : [
         {
+          "hidden" : true,
+          "image-name" : "ios-icon 2.png",
+          "name" : "ios-icon 2",
+          "position" : {
+            "scale" : 0.8,
+            "translation-in-points" : [
+              0,
+              -25
+            ]
+          }
+        },
+        {
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "app-icon.png",
           "name" : "app-icon",
           "position" : {

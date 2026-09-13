@@ -41,10 +41,29 @@ struct NotesListView: View {
                 .accessibilityLabel("Add note")
                 .padding()
             }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        print("TODO: search")
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        print("TODO: open settings")
+                    } label: {
+                        Image(systemName: "gear")
+                            .font(.title2)
+                    }
+                }
+            }
             .navigationTitle("Pilot Notes")
         } detail: {
             if let note = notesModel.note(id: selectedNoteID) {
-                NoteView(note: note)
+                NoteView(noteID: note.id)
             } else {
                 ContentUnavailableView(
                     "No Note Selected",

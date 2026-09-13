@@ -23,4 +23,19 @@ final class NotesModel {
     func note(id: Note.ID?) -> Note? {
         notes.first { $0.id == id }
     }
+
+    func setField(_ fieldID: NoteLayoutField.ID, to value: String, in noteID: Note.ID) {
+        guard let index = notes.firstIndex(where: { $0.id == noteID }) else { return }
+
+        if value.isEmpty {
+            notes[index].content.fieldValues.removeValue(forKey: fieldID)
+        } else {
+            notes[index].content.fieldValues[fieldID] = value
+        }
+    }
+
+    func setLogo(_ data: Data?, in noteID: Note.ID) {
+        guard let index = notes.firstIndex(where: { $0.id == noteID }) else { return }
+        notes[index].content.logoData = data
+    }
 }
