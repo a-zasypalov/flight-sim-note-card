@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct PilotNotesApp: App {
+    @State private var notesModel = NotesModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NotesListView()
+                .environment(notesModel)
         }
     }
 }

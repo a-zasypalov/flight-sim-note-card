@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		102CCA463056A84E002B29F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 102CCA283056A84E002B29F9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 102CCA2F3056A84E002B29F9;
+			remoteInfo = "Pilot Notes";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		102CCA303056A84E002B29F9 /* Pilot Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pilot Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pilot NotesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = "Pilot Notes";
 			sourceTree = "<group>";
 		};
+		102CCA413056A84E002B29F9 /* Pilot NotesTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Pilot NotesTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		102CCA2D3056A84E002B29F9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		102CCA423056A84E002B29F9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				102CCA323056A84E002B29F9 /* Pilot Notes */,
+				102CCA413056A84E002B29F9 /* Pilot NotesTests */,
 				102CCA313056A84E002B29F9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				102CCA303056A84E002B29F9 /* Pilot Notes.app */,
+				102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 102CCA303056A84E002B29F9 /* Pilot Notes.app */;
 			productType = "com.apple.product-type.application";
 		};
+		102CCA453056A84E002B29F9 /* Pilot NotesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 102CCA4A3056A84E002B29F9 /* Build configuration list for PBXNativeTarget "Pilot NotesTests" */;
+			buildPhases = (
+				102CCA433056A84E002B29F9 /* Sources */,
+				102CCA423056A84E002B29F9 /* Frameworks */,
+				102CCA443056A84E002B29F9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				102CCA473056A84E002B29F9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				102CCA413056A84E002B29F9 /* Pilot NotesTests */,
+			);
+			name = "Pilot NotesTests";
+			packageProductDependencies = (
+			);
+			productName = "Pilot NotesTests";
+			productReference = 102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					102CCA2F3056A84E002B29F9 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					102CCA453056A84E002B29F9 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 102CCA2F3056A84E002B29F9;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				102CCA2F3056A84E002B29F9 /* Pilot Notes */,
+				102CCA453056A84E002B29F9 /* Pilot NotesTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		102CCA2E3056A84E002B29F9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		102CCA443056A84E002B29F9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		102CCA433056A84E002B29F9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		102CCA473056A84E002B29F9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 102CCA2F3056A84E002B29F9 /* Pilot Notes */;
+			targetProxy = 102CCA463056A84E002B29F9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		102CCA393056A84E002B29F9 /* Debug */ = {
@@ -254,6 +329,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pilot Notes";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -300,6 +376,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pilot Notes";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -333,6 +410,64 @@
 			};
 			name = Release;
 		};
+		102CCA483056A84E002B29F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 55554XNCXE;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gaoyun.pilot-notes.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pilot Notes.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pilot Notes";
+			};
+			name = Debug;
+		};
+		102CCA493056A84E002B29F9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 55554XNCXE;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.gaoyun.pilot-notes.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pilot Notes.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Pilot Notes";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -350,6 +485,15 @@
 			buildConfigurations = (
 				102CCA3C3056A84E002B29F9 /* Debug */,
 				102CCA3D3056A84E002B29F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		102CCA4A3056A84E002B29F9 /* Build configuration list for PBXNativeTarget "Pilot NotesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				102CCA483056A84E002B29F9 /* Debug */,
+				102CCA493056A84E002B29F9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
