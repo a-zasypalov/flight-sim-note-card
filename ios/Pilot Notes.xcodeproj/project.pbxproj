@@ -16,21 +16,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXFileReference section */
+		102CCA303056A84E002B29F9 /* Pilot Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pilot Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pilot NotesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		102CCA4B3056A84E002B29F9 /* Exceptions for "Pilot Notes" folder in "Pilot Notes" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				"Pilot Notes.entitlements",
 			);
 			target = 102CCA2F3056A84E002B29F9 /* Pilot Notes */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileReference section */
-		102CCA303056A84E002B29F9 /* Pilot Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pilot Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pilot NotesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		102CCA323056A84E002B29F9 /* Pilot Notes */ = {

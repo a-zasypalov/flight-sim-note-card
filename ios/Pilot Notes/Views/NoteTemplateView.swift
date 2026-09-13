@@ -11,6 +11,7 @@ struct NoteTemplateView: View {
     let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     let onPickLogo: () -> Void
     let onDropLogo: (UIImage) -> Void
+    let onEditingChange: (Bool) -> Void
 
     var body: some View {
         PDFNoteTemplateView(
@@ -22,7 +23,8 @@ struct NoteTemplateView: View {
             onFieldChange: onFieldChange,
             onWritingRegionChange: onWritingRegionChange,
             onPickLogo: onPickLogo,
-            onDropLogo: onDropLogo
+            onDropLogo: onDropLogo,
+            onEditingChange: onEditingChange
         )
     }
 }
@@ -37,6 +39,7 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
     let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     let onPickLogo: () -> Void
     let onDropLogo: (UIImage) -> Void
+    let onEditingChange: (Bool) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -69,6 +72,8 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
         private weak var pinchGestureRecognizer: UIPinchGestureRecognizer?
         private var overlayView: NoteEditorOverlayView?
         private var keyboardOverlap: CGFloat = 0
+        private var isEditing = false
+        private var isFocusUpdateScheduled = false
 
         init(_ parent: PDFNoteTemplateView) {
             self.parent = parent
@@ -136,6 +141,9 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
                 onDropLogo: parent.onDropLogo,
                 onFocus: { [weak self] view in
                     self?.reveal(view, animated: true)
+                },
+                onFocusChange: { [weak self] in
+                    self?.scheduleFocusUpdate()
                 }
             )
             self.overlayView = overlayView
@@ -167,11 +175,38 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
             let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey]
                 as? Double ?? 0
             UIView.animate(withDuration: duration, delay: 0, options: .beginFromCurrentState) {
+                scrollView.contentInset.top += delta
                 scrollView.contentInset.bottom += delta
                 scrollView.verticalScrollIndicatorInsets.bottom += delta
                 if overlap > 0, let focusedView = self.overlayView?.focusedView {
                     self.reveal(focusedView, animated: false)
                 }
+            }
+        }
+
+        private func scheduleFocusUpdate() {
+            guard !isFocusUpdateScheduled else { return }
+            isFocusUpdateScheduled = true
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                isFocusUpdateScheduled = false
+                let hasFocus = overlayView?.focusedView != nil
+                guard hasFocus != isEditing else { return }
+                isEditing = hasFocus
+                parent.onEditingChange(hasFocus)
+                if !hasFocus {
+                    zoomToFit()
+                }
+            }
+        }
+
+        private func zoomToFit() {
+            guard let pdfView else { return }
+
+            UIView.animate(withDuration: 0.3, delay: 0, options: .beginFromCurrentState) {
+                pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit
+            } completion: { [weak self] _ in
+                self?.updateContentScale(for: pdfView)
             }
         }
 
@@ -226,6 +261,7 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     private var onFieldChange: (NoteLayoutField.ID, String) -> Void
     private var onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     private let onFocus: (UIView) -> Void
+    private let onFocusChange: () -> Void
     private var currentContentScale: CGFloat = 1
     private var isContentScaleUpdateScheduled = false
 
@@ -239,13 +275,15 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         onWritingRegionChange: @escaping (NoteLayoutRegion.ID, String) -> Void,
         onPickLogo: @escaping () -> Void,
         onDropLogo: @escaping (UIImage) -> Void,
-        onFocus: @escaping (UIView) -> Void
+        onFocus: @escaping (UIView) -> Void,
+        onFocusChange: @escaping () -> Void
     ) {
         self.layout = layout
         self.pageBounds = pageBounds
         self.onFieldChange = onFieldChange
         self.onWritingRegionChange = onWritingRegionChange
         self.onFocus = onFocus
+        self.onFocusChange = onFocusChange
         super.init(frame: pageBounds)
         backgroundColor = .clear
 
@@ -388,20 +426,24 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         scheduleContentScaleUpdate()
+        onFocusChange()
         onFocus(textField)
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         scheduleContentScaleUpdate()
+        onFocusChange()
     }
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         scheduleContentScaleUpdate()
+        onFocusChange()
         onFocus(textView)
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
         scheduleContentScaleUpdate()
+        onFocusChange()
     }
 
     private func setWritingText(
