@@ -2,15 +2,14 @@ import SwiftUI
 
 struct ChooseLayoutView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
     @State private var selectedLayoutID: NoteLayout.ID?
 
     let layouts: [NoteLayout]
-    let onCreate: (String, NoteLayout) -> Void
+    let onCreate: (NoteLayout) -> Void
 
     init(
         layouts: [NoteLayout] = NoteLayout.available,
-        onCreate: @escaping (String, NoteLayout) -> Void
+        onCreate: @escaping (NoteLayout) -> Void
     ) {
         self.layouts = layouts
         self.onCreate = onCreate
@@ -21,16 +20,12 @@ struct ChooseLayoutView: View {
     }
 
     private var canCreate: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && selectedLayout != nil
+        selectedLayout != nil
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Note") {
-                    TextField("Name", text: $name)
-                }
-
                 Section("Layout") {
                     ForEach(layouts) { layout in
                         Button {
@@ -51,7 +46,7 @@ struct ChooseLayoutView: View {
                     }
                 }
             }
-            .navigationTitle("New Note")
+            .navigationTitle("Choose a Layout")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -62,7 +57,7 @@ struct ChooseLayoutView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Create") {
                         guard let selectedLayout else { return }
-                        onCreate(name, selectedLayout)
+                        onCreate(selectedLayout)
                         dismiss()
                     }
                     .disabled(!canCreate)
@@ -78,5 +73,5 @@ struct ChooseLayoutView: View {
 }
 
 #Preview {
-    ChooseLayoutView { _, _ in }
+    ChooseLayoutView { _ in }
 }

@@ -3,7 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct NoteView: View {
-    @Environment(NotesModel.self) private var notesModel
+    @Binding var document: PilotNoteDocument
     @State private var isChoosingLogoSource = false
     @State private var isChoosingPhoto = false
     @State private var isChoosingFile = false
@@ -12,26 +12,29 @@ struct NoteView: View {
     @State private var isExporting = false
     @State private var errorMessage: String?
 
-    let noteID: Note.ID
+    let fileURL: URL?
 
-    private var note: Note? {
-        notesModel.note(id: noteID)
+    private var note: Note {
+        document.note
     }
 
     private var layout: NoteLayout? {
-        guard let note else { return nil }
-        return NoteLayout.available.first {
+        NoteLayout.available.first {
             $0.id == note.layoutID && $0.revision == note.layoutRevision
         }
     }
 
+    private var documentName: String {
+        fileURL?.deletingPathExtension().lastPathComponent ?? "Untitled"
+    }
+
     private var exportFilename: String {
-        note?.name.replacingOccurrences(of: "/", with: "-") ?? "Pilot Note"
+        documentName.replacingOccurrences(of: "/", with: "-")
     }
 
     var body: some View {
         Group {
-            if let note, let layout, let pdfURL = layout.pdfURL {
+            if let layout, let pdfURL = layout.pdfURL {
                 NoteTemplateView(
                     layout: layout,
                     pdfURL: pdfURL,
@@ -39,10 +42,10 @@ struct NoteView: View {
                     writingRegionValues: note.content.writingRegionValues,
                     logoData: note.content.logoData,
                     onFieldChange: { fieldID, value in
-                        notesModel.setField(fieldID, to: value, in: noteID)
+                        document.note.content.setField(fieldID, to: value)
                     },
                     onWritingRegionChange: { regionID, value in
-                        notesModel.setWritingRegion(regionID, to: value, in: noteID)
+                        document.note.content.setWritingRegion(regionID, to: value)
                     },
                     onPickLogo: {
                         isChoosingLogoSource = true
@@ -60,7 +63,7 @@ struct NoteView: View {
         }
         .ignoresSafeArea(.container, edges: [.top, .bottom])
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .navigationTitle(note?.name ?? "Note")
+        .navigationTitle(documentName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
 
@@ -71,7 +74,7 @@ struct NoteView: View {
                     } label: {
                         Label("Annotate", systemImage: "pencil.tip.crop.circle")
                     }
-                    .disabled(note == nil || layout == nil)
+                    .disabled(layout == nil)
                 }
             }
 
@@ -81,16 +84,7 @@ struct NoteView: View {
                 } label: {
                     Label("Export PDF", systemImage: "square.and.arrow.up")
                 }
-                .disabled(note == nil || layout == nil)
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    print("Todo: implement options")
-                } label: {
-                    Label("Rename", systemImage: "ellipsis")
-                }
-                .disabled(note == nil || layout == nil)
+                .disabled(layout == nil)
             }
 
         }
@@ -101,9 +95,9 @@ struct NoteView: View {
             Button("Files") {
                 isChoosingFile = true
             }
-            if note?.content.logoData != nil {
+            if note.content.logoData != nil {
                 Button("Remove Logo", role: .destructive) {
-                    notesModel.setLogo(nil, in: noteID)
+                    document.note.content.logoData = nil
                 }
             }
         }
@@ -207,11 +201,11 @@ struct NoteView: View {
         let data = UIGraphicsImageRenderer(size: size, format: format).pngData { _ in
             image.draw(in: imageFrame)
         }
-        notesModel.setLogo(data, in: noteID)
+        document.note.content.logoData = data
     }
 
     private func prepareExport() {
-        guard let note, let layout else { return }
+        guard let layout else { return }
 
         do {
             exportDocument = try NotePDFExporter.document(for: note, layout: layout)
@@ -223,9 +217,8 @@ struct NoteView: View {
 }
 
 #Preview {
-    let note = Note(name: "EDDF to EDDM", layout: .vatsimFlightCard)
+    @Previewable @State var document = PilotNoteDocument(layout: .vatsimFlightCard)
     NavigationStack {
-        NoteView(noteID: note.id)
-            .environment(NotesModel(notes: [note]))
+        NoteView(document: $document, fileURL: nil)
     }
 }

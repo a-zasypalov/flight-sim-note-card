@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-struct NoteLayout: Codable, Hashable, Identifiable, Sendable {
+nonisolated struct NoteLayout: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let revision: Int
     let name: String
@@ -51,7 +51,7 @@ struct NoteLayout: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
-struct NoteLayoutField: Codable, Hashable, Identifiable, Sendable {
+nonisolated struct NoteLayoutField: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let label: String
     let frame: LayoutRect
@@ -69,7 +69,7 @@ struct NoteLayoutField: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
-struct NoteLayoutRegion: Codable, Hashable, Identifiable, Sendable {
+nonisolated struct NoteLayoutRegion: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let label: String
     let frame: LayoutRect
@@ -78,12 +78,12 @@ struct NoteLayoutRegion: Codable, Hashable, Identifiable, Sendable {
     let fontSize: Double?
 }
 
-struct LayoutSize: Codable, Hashable, Sendable {
+nonisolated struct LayoutSize: Codable, Hashable, Sendable {
     let width: Double
     let height: Double
 }
 
-struct LayoutRect: Codable, Hashable, Sendable {
+nonisolated struct LayoutRect: Codable, Hashable, Sendable {
     // Millimetres from the card's bottom-left corner.
     let x: Double
     let y: Double
@@ -91,12 +91,12 @@ struct LayoutRect: Codable, Hashable, Sendable {
     let height: Double
 }
 
-enum LayoutTextAlignment: String, Codable, Hashable, Sendable {
+nonisolated enum LayoutTextAlignment: String, Codable, Hashable, Sendable {
     case leading
     case center
     case trailing
 }
 
-enum NoteFieldFormat: String, Codable, Hashable, Sendable {
+nonisolated enum NoteFieldFormat: String, Codable, Hashable, Sendable {
     case frequency
 }

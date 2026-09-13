@@ -4,7 +4,7 @@ Pilot Notes is growing from a printable VATSIM flight card into a native note ed
 
 - `latex/` contains the reference design for the first flight-card layout.
 - `web/` contains the browser-only generator and can prefill card basics from an ICAO `(FPL-...)` message.
-- `ios/` contains the native SwiftUI app for iPhone and iPad. Notes can edit layout-defined fields, add an aspect-fitted logo from Photos, Files, or drag and drop, and export the composed card as a PDF.
+- `ios/` contains the native SwiftUI document app for iPhone and iPad. Notes can edit layout-defined fields, add an aspect-fitted logo from Photos, Files, or drag and drop, and export the composed card as a PDF.
 
 Run the web app with `cd web && npm install && npm run dev`. Build it with `npm run build`.
 
@@ -20,6 +20,8 @@ pdflatex -interaction=nonstopmode -halt-on-error -jobname=vatsim-flight-card-a5 
 
 For Cloudflare Pages, set the root directory to `web`, the build command to `npm run build`, and the output directory to `dist`.
 
-Open `ios/Pilot Notes.xcodeproj` in Xcode to run the native app. Note content currently resets when the app process restarts; persistence and iCloud sync will be added with SwiftData later.
+Open `ios/Pilot Notes.xcodeproj` in Xcode to run the native app. Editable notes are `.pilotnote` document packages managed by the system document browser and synchronized by iCloud Drive when stored in the Pilot Notes iCloud folder. PDF exports remain separate user-managed files.
+
+The iCloud container `iCloud.com.gaoyun.pilot-notes` must be enabled for Apple Developer team `55554XNCXE` before testing sync on signed devices.
 
 Native layouts live in `ios/Pilot Notes/Layouts/` as an immutable PDF and JSON geometry manifest for each revision. Add a new revision instead of replacing one already referenced by saved notes.

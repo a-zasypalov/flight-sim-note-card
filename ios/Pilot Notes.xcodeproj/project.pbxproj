@@ -16,6 +16,17 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		102CCA4B3056A84E002B29F9 /* Exceptions for "Pilot Notes" folder in "Pilot Notes" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				"Pilot Notes.entitlements",
+			);
+			target = 102CCA2F3056A84E002B29F9 /* Pilot Notes */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileReference section */
 		102CCA303056A84E002B29F9 /* Pilot Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pilot Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		102CCA403056A84E002B29F9 /* Pilot NotesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Pilot NotesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -24,6 +35,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		102CCA323056A84E002B29F9 /* Pilot Notes */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				102CCA4B3056A84E002B29F9 /* Exceptions for "Pilot Notes" folder in "Pilot Notes" target */,
+			);
 			path = "Pilot Notes";
 			sourceTree = "<group>";
 		};
@@ -130,6 +144,11 @@
 				TargetAttributes = {
 					102CCA2F3056A84E002B29F9 = {
 						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 					102CCA453056A84E002B29F9 = {
 						CreatedOnToolsVersion = 26.5;
@@ -321,14 +340,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Pilot Notes/Pilot Notes.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 55554XNCXE;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pilot Notes/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Pilot Notes";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -368,14 +389,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Pilot Notes/Pilot Notes.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 55554XNCXE;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pilot Notes/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Pilot Notes";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
