@@ -11,12 +11,10 @@ import SwiftUI
 struct PilotNotesApp: App {
     var body: some Scene {
         DocumentGroup(newDocument: PilotNoteDocument(layout: .vatsimFlightCard)) { configuration in
-            NavigationStack {
-                NoteView(document: configuration.$document, fileURL: configuration.fileURL)
-            }
+            NoteView(document: configuration.$document)
         }
 
-        DocumentGroupLaunchScene("Pilot Notes") {
+        DocumentGroupLaunchScene("Pilot Notes", backgroundStyle: PNColors.launchBackground) {
             NewPilotNoteButton()
         }
     }

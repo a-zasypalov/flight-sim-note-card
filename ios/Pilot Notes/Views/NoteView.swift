@@ -3,6 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct NoteView: View {
+    @Environment(\.documentConfiguration) private var documentConfiguration
     @Binding var document: PilotNoteDocument
     @State private var isChoosingLogoSource = false
     @State private var isChoosingPhoto = false
@@ -11,8 +12,6 @@ struct NoteView: View {
     @State private var exportDocument: NotePDFDocument?
     @State private var isExporting = false
     @State private var errorMessage: String?
-
-    let fileURL: URL?
 
     private var note: Note {
         document.note
@@ -25,7 +24,7 @@ struct NoteView: View {
     }
 
     private var documentName: String {
-        fileURL?.deletingPathExtension().lastPathComponent ?? "Untitled"
+        documentConfiguration?.fileURL?.deletingPathExtension().lastPathComponent ?? "Untitled"
     }
 
     private var exportFilename: String {
@@ -66,7 +65,6 @@ struct NoteView: View {
         .navigationTitle(documentName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-
             if(UIDevice.current.userInterfaceIdiom == .pad) {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -86,7 +84,6 @@ struct NoteView: View {
                 }
                 .disabled(layout == nil)
             }
-
         }
         .confirmationDialog("Logo", isPresented: $isChoosingLogoSource) {
             Button("Photo Library") {
@@ -219,6 +216,6 @@ struct NoteView: View {
 #Preview {
     @Previewable @State var document = PilotNoteDocument(layout: .vatsimFlightCard)
     NavigationStack {
-        NoteView(document: $document, fileURL: nil)
+        NoteView(document: $document)
     }
 }
