@@ -69,8 +69,13 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
                 guard let self else { return }
                 hasEditingSession = true
                 self.template.isEditing = true
-                if fitsWidth && scrollView.zoomScale > widthFitScale {
-                    scrollView.setZoomScale(widthFitScale, animated: true)
+                if fitsWidth {
+                    if scrollView.zoomScale > widthFitScale {
+                        scrollView.setZoomScale(widthFitScale, animated: true)
+                    }
+                    scrollView.maximumZoomScale = widthFitScale
+                } else {
+                    scrollView.maximumZoomScale = max(4, fitScale * 6)
                 }
             },
             onDone: { [weak self] in self?.template.isEditing = false }
