@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct NoteView: View {
     @Environment(\.documentConfiguration) private var documentConfiguration
+    @Environment(\.scenePhase) private var scenePhase
     @Binding var document: PilotNoteDocument
     @State private var isChoosingLogoSource = false
     @State private var isChoosingPhoto = false
@@ -51,7 +52,7 @@ struct NoteView: View {
                         isChoosingLogoSource = true
                     },
                     onDropLogo: setLogo,
-                    onEditingChange: { isEditingField = $0 }
+                    isEditing: $isEditingField
                 )
                 .id(note.id)
             } else {
@@ -62,8 +63,7 @@ struct NoteView: View {
                 )
             }
         }
-        .background(SystemBackButtonHidden(isHidden: isEditingField))
-        .ignoresSafeArea(.container, edges: [.top, .bottom])
+        .background(SystemBackButtonHidden(isHidden: isEditingField, scenePhase: scenePhase))
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle(documentName)
         .navigationBarTitleDisplayMode(.inline)
@@ -71,12 +71,7 @@ struct NoteView: View {
             if isEditingField {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        UIApplication.shared.sendAction(
-                            #selector(UIResponder.resignFirstResponder),
-                            to: nil,
-                            from: nil,
-                            for: nil
-                        )
+                        isEditingField = false
                     } label: {
                         Label("Done", systemImage: "checkmark")
                     }
@@ -240,6 +235,8 @@ struct NoteView: View {
 /// synthesizes from it; restoring the stashed action brings the button back unchanged.
 private struct SystemBackButtonHidden: UIViewRepresentable {
     let isHidden: Bool
+    // DocumentGroup can restore its back action when the scene is reactivated.
+    let scenePhase: ScenePhase
 
     func makeUIView(context: Context) -> UIView {
         let view = UIView()

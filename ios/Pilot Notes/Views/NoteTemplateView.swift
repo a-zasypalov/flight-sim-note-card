@@ -1,7 +1,6 @@
-import PDFKit
 import SwiftUI
 
-struct NoteTemplateView: View {
+struct NoteTemplateView: UIViewRepresentable {
     let layout: NoteLayout
     let pdfURL: URL
     let fieldValues: [NoteLayoutField.ID: String]
@@ -11,241 +10,192 @@ struct NoteTemplateView: View {
     let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
     let onPickLogo: () -> Void
     let onDropLogo: (UIImage) -> Void
-    let onEditingChange: (Bool) -> Void
+    @Binding var isEditing: Bool
 
-    var body: some View {
-        PDFNoteTemplateView(
-            layout: layout,
-            pdfURL: pdfURL,
-            fieldValues: fieldValues,
-            writingRegionValues: writingRegionValues,
-            logoData: logoData,
-            onFieldChange: onFieldChange,
-            onWritingRegionChange: onWritingRegionChange,
-            onPickLogo: onPickLogo,
-            onDropLogo: onDropLogo,
-            onEditingChange: onEditingChange
+    func makeUIView(context: Context) -> NoteCanvasView {
+        NoteCanvasView(template: self)
+    }
+
+    func updateUIView(_ view: NoteCanvasView, context: Context) {
+        view.update(self)
+    }
+}
+
+final class NoteCanvasView: UIView, UIScrollViewDelegate {
+    let scrollView = UIScrollView()
+    private let pageView = UIView()
+    private var overlayView: NoteEditorOverlayView!
+    private var template: NoteTemplateView
+    private var hasEditingSession = false
+    private var fittedSize = CGSize.zero
+    private var isCaretUpdateScheduled = false
+
+    init(template: NoteTemplateView) {
+        self.template = template
+        super.init(frame: .zero)
+        backgroundColor = .secondarySystemBackground
+
+        scrollView.delegate = self
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.keyboardDismissMode = .none
+        scrollView.delaysContentTouches = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(scrollView)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor)
+        ])
+
+        guard let document = CGPDFDocument(template.pdfURL as CFURL),
+              let page = document.page(at: 1) else { return }
+        pageView.bounds = CGRect(origin: .zero, size: page.getBoxRect(.mediaBox).size)
+        pageView.frame.origin = .zero
+        pageView.addSubview(NotePDFBackgroundView(page: page))
+        scrollView.addSubview(pageView)
+        scrollView.contentSize = pageView.bounds.size
+
+        overlayView = NoteEditorOverlayView(
+            layout: template.layout,
+            pageBounds: pageView.bounds,
+            fieldValues: template.fieldValues,
+            writingRegionValues: template.writingRegionValues,
+            logoData: template.logoData,
+            onFieldChange: template.onFieldChange,
+            onWritingRegionChange: template.onWritingRegionChange,
+            onPickLogo: template.onPickLogo,
+            onDropLogo: template.onDropLogo,
+            onFocus: { [weak self] in
+                guard let self else { return }
+                hasEditingSession = true
+                self.template.isEditing = true
+                scheduleCaretReveal()
+            },
+            onCaretChange: { [weak self] in self?.scheduleCaretReveal() },
+            onDone: { [weak self] in self?.template.isEditing = false }
+        )
+        pageView.addSubview(overlayView)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func update(_ template: NoteTemplateView) {
+        self.template = template
+        if hasEditingSession && !template.isEditing {
+            hasEditingSession = false
+            endEditing(true)
+            scrollView.setZoomScale(fitScale, animated: true)
+        }
+        overlayView?.update(
+            fieldValues: template.fieldValues,
+            writingRegionValues: template.writingRegionValues,
+            logoData: template.logoData,
+            onFieldChange: template.onFieldChange,
+            onWritingRegionChange: template.onWritingRegionChange,
+            onPickLogo: template.onPickLogo,
+            onDropLogo: template.onDropLogo
         )
     }
-}
 
-private struct PDFNoteTemplateView: UIViewRepresentable {
-    let layout: NoteLayout
-    let pdfURL: URL
-    let fieldValues: [NoteLayoutField.ID: String]
-    let writingRegionValues: [NoteLayoutRegion.ID: String]
-    let logoData: Data?
-    let onFieldChange: (NoteLayoutField.ID, String) -> Void
-    let onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
-    let onPickLogo: () -> Void
-    let onDropLogo: (UIImage) -> Void
-    let onEditingChange: (Bool) -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+    private var fitScale: CGFloat {
+        guard pageView.bounds.width > 0, pageView.bounds.height > 0 else { return 1 }
+        let available = bounds.inset(by: safeAreaInsets).insetBy(dx: 12, dy: 12)
+        return min(available.width / pageView.bounds.width, available.height / pageView.bounds.height)
     }
-
-    func makeUIView(context: Context) -> PDFView {
-        let pdfView = NotePDFView()
-        pdfView.displayBox = .mediaBox
-        pdfView.displayMode = .singlePage
-        pdfView.pageOverlayViewProvider = context.coordinator
-        pdfView.document = PDFDocument(url: pdfURL)
-        pdfView.autoScales = true
-        context.coordinator.observeZoomGesture(in: pdfView)
-        context.coordinator.observeKeyboard()
-        return pdfView
-    }
-
-    func updateUIView(_ pdfView: PDFView, context: Context) {
-        context.coordinator.update(self)
-    }
-
-    static func dismantleUIView(_ pdfView: PDFView, coordinator: Coordinator) {
-        coordinator.stopObservingZoomGesture()
-        coordinator.stopObservingKeyboard()
-    }
-
-    final class Coordinator: NSObject, PDFPageOverlayViewProvider {
-        private var parent: PDFNoteTemplateView
-        private weak var pdfView: PDFView?
-        private weak var pinchGestureRecognizer: UIPinchGestureRecognizer?
-        private var overlayView: NoteEditorOverlayView?
-        private var keyboardOverlap: CGFloat = 0
-        private var isEditing = false
-        private var isFocusUpdateScheduled = false
-
-        init(_ parent: PDFNoteTemplateView) {
-            self.parent = parent
-        }
-
-        func observeZoomGesture(in pdfView: PDFView) {
-            self.pdfView = pdfView
-            guard
-                let pinchGestureRecognizer = scrollView(in: pdfView)?.pinchGestureRecognizer,
-                pinchGestureRecognizer !== self.pinchGestureRecognizer
-            else { return }
-
-            stopObservingZoomGesture()
-            self.pinchGestureRecognizer = pinchGestureRecognizer
-            pinchGestureRecognizer.addTarget(self, action: #selector(zoomGestureChanged(_:)))
-        }
-
-        func stopObservingZoomGesture() {
-            pinchGestureRecognizer?.removeTarget(self, action: #selector(zoomGestureChanged(_:)))
-            pinchGestureRecognizer = nil
-        }
-
-        func observeKeyboard() {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(keyboardFrameChanged(_:)),
-                name: UIResponder.keyboardWillChangeFrameNotification,
-                object: nil
-            )
-        }
-
-        func stopObservingKeyboard() {
-            NotificationCenter.default.removeObserver(
-                self,
-                name: UIResponder.keyboardWillChangeFrameNotification,
-                object: nil
-            )
-        }
-
-        func update(_ parent: PDFNoteTemplateView) {
-            self.parent = parent
-            overlayView?.update(
-                fieldValues: parent.fieldValues,
-                writingRegionValues: parent.writingRegionValues,
-                logoData: parent.logoData,
-                onFieldChange: parent.onFieldChange,
-                onWritingRegionChange: parent.onWritingRegionChange,
-                onPickLogo: parent.onPickLogo,
-                onDropLogo: parent.onDropLogo
-            )
-        }
-
-        func pdfView(_ pdfView: PDFView, overlayViewFor page: PDFPage) -> UIView? {
-            observeZoomGesture(in: pdfView)
-            pdfView.documentView?.subviews.forEach { $0.isUserInteractionEnabled = true }
-            let overlayView = NoteEditorOverlayView(
-                layout: parent.layout,
-                pageBounds: page.bounds(for: .mediaBox),
-                fieldValues: parent.fieldValues,
-                writingRegionValues: parent.writingRegionValues,
-                logoData: parent.logoData,
-                onFieldChange: parent.onFieldChange,
-                onWritingRegionChange: parent.onWritingRegionChange,
-                onPickLogo: parent.onPickLogo,
-                onDropLogo: parent.onDropLogo,
-                onFocus: { [weak self] view in
-                    self?.reveal(view, animated: true)
-                },
-                onFocusChange: { [weak self] in
-                    self?.scheduleFocusUpdate()
-                }
-            )
-            self.overlayView = overlayView
-            updateContentScale(for: pdfView)
-            return overlayView
-        }
-
-        @objc private func zoomGestureChanged(_ gesture: UIPinchGestureRecognizer) {
-            guard [.ended, .cancelled, .failed].contains(gesture.state) else { return }
-            guard let pdfView else { return }
-            updateContentScale(for: pdfView)
-        }
-
-        @objc private func keyboardFrameChanged(_ notification: Notification) {
-            guard
-                let pdfView,
-                let scrollView = scrollView(in: pdfView),
-                let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-                    as? CGRect
-            else { return }
-
-            let localFrame = pdfView.convert(keyboardFrame, from: nil)
-            let overlap = localFrame.intersects(pdfView.bounds)
-                ? max(0, pdfView.bounds.maxY - localFrame.minY)
-                : 0
-            let delta = overlap - keyboardOverlap
-            keyboardOverlap = overlap
-
-            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey]
-                as? Double ?? 0
-            UIView.animate(withDuration: duration, delay: 0, options: .beginFromCurrentState) {
-                scrollView.contentInset.top += delta
-                scrollView.contentInset.bottom += delta
-                scrollView.verticalScrollIndicatorInsets.bottom += delta
-            }
-        }
-
-        private func scheduleFocusUpdate() {
-            guard !isFocusUpdateScheduled else { return }
-            isFocusUpdateScheduled = true
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                isFocusUpdateScheduled = false
-                let hasFocus = overlayView?.focusedView != nil
-                guard hasFocus != isEditing else { return }
-                isEditing = hasFocus
-                parent.onEditingChange(hasFocus)
-                if !hasFocus {
-                    zoomToFit()
-                }
-            }
-        }
-
-        private func zoomToFit() {
-            guard let pdfView else { return }
-
-            UIView.animate(withDuration: 0.3, delay: 0, options: .beginFromCurrentState) {
-                pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit
-            } completion: { [weak self] _ in
-                self?.updateContentScale(for: pdfView)
-            }
-        }
-
-        private func updateContentScale(for pdfView: PDFView) {
-            overlayView?.updateContentScale(
-                pdfView.traitCollection.displayScale * pdfView.scaleFactor
-            )
-        }
-
-        private func reveal(_ view: UIView, animated: Bool) {
-            guard let pdfView, let scrollView = scrollView(in: pdfView) else { return }
-
-            DispatchQueue.main.async { [weak view, weak scrollView] in
-                guard let view, let scrollView else { return }
-                let rect = view.convert(view.bounds, to: scrollView).insetBy(dx: -12, dy: -12)
-                scrollView.scrollRectToVisible(rect, animated: animated)
-            }
-        }
-
-        private func scrollView(in view: UIView) -> UIScrollView? {
-            if let scrollView = view as? UIScrollView {
-                return scrollView
-            }
-            return view.subviews.lazy.compactMap { self.scrollView(in: $0) }.first
-        }
-    }
-}
-
-private final class NotePDFView: PDFView {
-    private let minimumScaleRatio: CGFloat = 0.8
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        let minimumScale = scaleFactorForSizeToFit * minimumScaleRatio
-        guard minimumScale > 0 else { return }
+        guard bounds.width > 0, bounds.height > 0, overlayView != nil else { return }
+        if fittedSize != bounds.size {
+            let initialLayout = fittedSize == .zero
+            fittedSize = bounds.size
+            scrollView.minimumZoomScale = fitScale * 0.8
+            scrollView.maximumZoomScale = max(4, fitScale * 6)
+            if initialLayout {
+                scrollView.zoomScale = fitScale
+                overlayView.updateContentScale(traitCollection.displayScale * scrollView.zoomScale)
+            }
+        }
+        centerPage()
+        scheduleCaretReveal()
+    }
 
-        if abs(minScaleFactor - minimumScale) > 0.001 {
-            minScaleFactor = minimumScale
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        pageView
+    }
+
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        centerPage()
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        overlayView?.updateContentScale(traitCollection.displayScale * scale)
+    }
+
+    private func centerPage() {
+        let horizontal = max(12, (scrollView.bounds.width - scrollView.contentSize.width) / 2)
+        let vertical = max(12, (scrollView.bounds.height - scrollView.contentSize.height) / 2)
+        scrollView.contentInset = UIEdgeInsets(
+            top: vertical, left: horizontal, bottom: vertical, right: horizontal
+        )
+    }
+
+    private func scheduleCaretReveal() {
+        guard !isCaretUpdateScheduled else { return }
+        isCaretUpdateScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            isCaretUpdateScheduled = false
+            revealCaret()
         }
-        if scaleFactor < minimumScale {
-            scaleFactor = minimumScale
-        }
+    }
+
+    func revealCaret() {
+        guard !scrollView.isZooming, !scrollView.isDragging,
+              let view = overlayView?.focusedView,
+              let input = view as? UITextInput,
+              let selection = input.selectedTextRange else { return }
+        view.layoutIfNeeded()
+        let rect = view.convert(input.caretRect(for: selection.end), to: scrollView)
+            .insetBy(dx: -16, dy: -12)
+        guard !scrollView.bounds.contains(rect) else { return }
+        scrollView.scrollRectToVisible(rect, animated: false)
+    }
+}
+
+private final class NotePDFBackgroundView: UIView {
+    private let page: CGPDFPage
+
+    override class var layerClass: AnyClass { CATiledLayer.self }
+
+    init(page: CGPDFPage) {
+        self.page = page
+        super.init(frame: CGRect(origin: .zero, size: page.getBoxRect(.mediaBox).size))
+        backgroundColor = .white
+        isUserInteractionEnabled = false
+        let tiles = layer as! CATiledLayer
+        tiles.levelsOfDetail = 4
+        tiles.levelsOfDetailBias = 4
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.setFillColor(UIColor.white.cgColor)
+        context.fill(rect)
+        context.translateBy(x: 0, y: bounds.height)
+        context.scaleBy(x: 1, y: -1)
+        let sourceBounds = page.getBoxRect(.mediaBox)
+        context.translateBy(x: -sourceBounds.minX, y: -sourceBounds.minY)
+        context.drawPDFPage(page)
     }
 }
 
@@ -257,8 +207,9 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     private var logoView: LogoDropView?
     private var onFieldChange: (NoteLayoutField.ID, String) -> Void
     private var onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
-    private let onFocus: (UIView) -> Void
-    private let onFocusChange: () -> Void
+    private let onFocus: () -> Void
+    private let onCaretChange: () -> Void
+    private let onDone: () -> Void
     private var currentContentScale: CGFloat = 1
     private var isContentScaleUpdateScheduled = false
 
@@ -272,20 +223,24 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         onWritingRegionChange: @escaping (NoteLayoutRegion.ID, String) -> Void,
         onPickLogo: @escaping () -> Void,
         onDropLogo: @escaping (UIImage) -> Void,
-        onFocus: @escaping (UIView) -> Void,
-        onFocusChange: @escaping () -> Void
+        onFocus: @escaping () -> Void,
+        onCaretChange: @escaping () -> Void,
+        onDone: @escaping () -> Void
     ) {
         self.layout = layout
         self.pageBounds = pageBounds
         self.onFieldChange = onFieldChange
         self.onWritingRegionChange = onWritingRegionChange
         self.onFocus = onFocus
-        self.onFocusChange = onFocusChange
+        self.onCaretChange = onCaretChange
+        self.onDone = onDone
         super.init(frame: pageBounds)
         backgroundColor = .clear
 
         for (index, region) in layout.writingRegions.enumerated() {
-            let textView = UITextView(frame: layout.pageRect(for: region.frame, in: pageBounds))
+            let textView = WritingTextView(
+                frame: layout.pageRect(for: region.frame, in: pageBounds)
+            )
             textView.tag = index
             setWritingText(writingRegionValues[region.id] ?? "", in: textView, for: region)
             textView.backgroundColor = .clear
@@ -419,28 +374,56 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
 
     func textViewDidChange(_ textView: UITextView) {
         onWritingRegionChange(layout.writingRegions[textView.tag].id, textView.text)
+        onCaretChange()
+    }
+
+    func textView(
+        _ textView: UITextView,
+        shouldChangeTextIn range: NSRange,
+        replacementText text: String
+    ) -> Bool {
+        guard let replacement = WritingRegionTextLimiter.fittingReplacement(
+            text,
+            in: textView,
+            replacing: range
+        ) else { return false }
+        guard replacement != text else { return true }
+        guard range.length > 0 || !replacement.isEmpty else { return false }
+
+        guard let start = textView.position(from: textView.beginningOfDocument, offset: range.location),
+              let end = textView.position(from: start, offset: range.length),
+              let selection = textView.textRange(from: start, to: end) else { return false }
+        textView.replace(selection, withText: replacement)
+        textViewDidChange(textView)
+        return false
+    }
+
+    func textViewDidChangeSelection(_ textView: UITextView) {
+        guard textView.isFirstResponder else { return }
+        onCaretChange()
+    }
+
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        guard textField.isFirstResponder else { return }
+        onCaretChange()
     }
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         scheduleContentScaleUpdate()
-        onFocusChange()
-        onFocus(textField)
+        onFocus()
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         scheduleContentScaleUpdate()
-        onFocusChange()
     }
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         scheduleContentScaleUpdate()
-        onFocusChange()
-        onFocus(textView)
+        onFocus()
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
         scheduleContentScaleUpdate()
-        onFocusChange()
     }
 
     private func setWritingText(
@@ -452,8 +435,9 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         let fontSize = CGFloat(region.fontSize ?? 8.5)
         let font = UIFont(name: "Courier", size: fontSize)
             ?? UIFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+        let lineHeight = CGFloat(region.baselineSpacing) * scale
         let paragraph = NSMutableParagraphStyle()
-        paragraph.lineSpacing = max(0, CGFloat(region.baselineSpacing) * scale - font.lineHeight)
+        paragraph.minimumLineHeight = lineHeight
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: UIColor(white: 0.16, alpha: 1),
@@ -461,7 +445,7 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         ]
 
         textView.textContainerInset = UIEdgeInsets(
-            top: max(0, CGFloat(region.firstBaselineOffset) * scale - font.ascender),
+            top: max(0, CGFloat(region.firstBaselineOffset) * scale - lineHeight - font.descender),
             left: scale,
             bottom: 0,
             right: scale
@@ -516,9 +500,81 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         if fieldViews.indices.contains(nextIndex) {
             fieldViews[nextIndex].becomeFirstResponder()
         } else {
-            textField.resignFirstResponder()
+            onDone()
         }
         return true
+    }
+}
+
+private final class WritingTextView: UITextView {
+    override func caretRect(for position: UITextPosition) -> CGRect {
+        var rect = super.caretRect(for: position)
+        guard
+            let font = typingAttributes[.font] as? UIFont,
+            rect.height > font.lineHeight
+        else { return rect }
+        // Ruled line height adds space above the glyphs, not below their baseline.
+        rect.origin.y = rect.maxY - font.lineHeight
+        rect.size.height = font.lineHeight
+        return rect
+    }
+}
+
+enum WritingRegionTextLimiter {
+    static func fittingReplacement(
+        _ replacement: String,
+        in textView: UITextView,
+        replacing range: NSRange
+    ) -> String? {
+        let current = textView.text ?? ""
+        guard let stringRange = Range(range, in: current) else { return nil }
+
+        func candidate(_ prefix: Substring) -> String {
+            current.replacingCharacters(in: stringRange, with: prefix)
+        }
+
+        guard !replacement.isEmpty else { return replacement }
+        guard !fits(candidate(replacement[...]), in: textView) else { return replacement }
+        guard fits(candidate(replacement[..<replacement.startIndex]), in: textView) else {
+            return ""
+        }
+
+        let boundaries = Array(replacement.indices) + [replacement.endIndex]
+        var lowerBound = 0
+        var upperBound = boundaries.count - 1
+        while lowerBound < upperBound {
+            let index = (lowerBound + upperBound + 1) / 2
+            if fits(candidate(replacement[..<boundaries[index]]), in: textView) {
+                lowerBound = index
+            } else {
+                upperBound = index - 1
+            }
+        }
+        return String(replacement[..<boundaries[lowerBound]])
+    }
+
+    private static func fits(_ text: String, in textView: UITextView) -> Bool {
+        let storage = NSTextStorage(
+            attributedString: NSAttributedString(
+                string: text,
+                attributes: textView.typingAttributes
+            )
+        )
+        let layoutManager = NSLayoutManager()
+        let container = NSTextContainer(
+            size: textView.bounds.inset(by: textView.textContainerInset).size
+        )
+        container.lineBreakMode = textView.textContainer.lineBreakMode
+        container.lineFragmentPadding = textView.textContainer.lineFragmentPadding
+        layoutManager.addTextContainer(container)
+        storage.addLayoutManager(layoutManager)
+        layoutManager.ensureLayout(for: container)
+
+        let visibleGlyphs = layoutManager.glyphRange(for: container)
+        guard NSMaxRange(visibleGlyphs) == layoutManager.numberOfGlyphs else { return false }
+        return text.last?.isNewline != true
+            || (!layoutManager.extraLineFragmentRect.isEmpty
+                && layoutManager.extraLineFragmentRect.maxY <= container.size.height)
     }
 }
 

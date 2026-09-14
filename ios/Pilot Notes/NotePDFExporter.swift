@@ -88,9 +88,10 @@ enum NotePDFExporter {
             let fontSize = CGFloat(region.fontSize ?? 8.5)
             let font = UIFont(name: "Courier", size: fontSize)
                 ?? UIFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+            let lineHeight = CGFloat(region.baselineSpacing) * scale
             let paragraph = NSMutableParagraphStyle()
             paragraph.lineBreakMode = .byWordWrapping
-            paragraph.lineSpacing = max(0, CGFloat(region.baselineSpacing) * scale - font.lineHeight)
+            paragraph.minimumLineHeight = lineHeight
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor(white: 0.16, alpha: 1),
@@ -99,7 +100,8 @@ enum NotePDFExporter {
             let regionFrame = layout.pageRect(for: region.frame, in: pageBounds)
             let top = regionFrame.minY
                 + CGFloat(region.firstBaselineOffset) * scale
-                - font.ascender
+                - lineHeight
+                - font.descender
             let frame = CGRect(
                 x: regionFrame.minX + scale,
                 y: top,

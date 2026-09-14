@@ -109,14 +109,62 @@ struct PilotNoteDocumentTests {
     func exportsPDF() throws {
         var note = Note(layout: .vatsimFlightCard)
         note.content.fieldValues["callsign"] = "DLH123"
-        note.content.writingRegionValues["inFlight"] = "Direct KERAX"
+        note.content.writingRegionValues["inFlight"] = "KERAX\n\nNORKU"
 
         let document = try NotePDFExporter.document(for: note, layout: .vatsimFlightCard)
         let pdf = try #require(PDFDocument(data: document.data))
+        let page = try #require(pdf.page(at: 0))
+        let pageText = try #require(page.string) as NSString
+        let firstLine = try #require(page.selection(for: pageText.range(of: "KERAX")))
+        let thirdLine = try #require(page.selection(for: pageText.range(of: "NORKU")))
+        let expectedSpacing = 2 * 6 * page.bounds(for: .mediaBox).height
+            / CGFloat(NoteLayout.vatsimFlightCard.pageSize.height)
 
         #expect(pdf.pageCount == 1)
-        #expect(pdf.page(at: 0)?.string?.contains("DLH123") == true)
-        #expect(pdf.page(at: 0)?.string?.contains("Direct KERAX") == true)
+        #expect(pageText.contains("DLH123"))
+        #expect(abs(abs(firstLine.bounds(for: page).midY - thirdLine.bounds(for: page).midY) - expectedSpacing) < 0.5)
+    }
+
+    @Test("Writing regions enforce their ruled row capacity")
+    func writingRegionCapacity() throws {
+        let capacities = ["pushbackTaxi": 2, "inFlight": 10, "arrivalTaxi": 2]
+
+        for region in NoteLayout.vatsimFlightCard.writingRegions {
+            let textView = try writingTextView(for: region)
+            let allowed = Array(repeating: "A", count: try #require(capacities[region.id]))
+                .joined(separator: "\n")
+
+            #expect(fitting(allowed, in: textView) == allowed)
+            #expect(fitting(allowed + "\n", in: textView) == allowed)
+            #expect(fitting(allowed + "\nB", in: textView) == allowed)
+        }
+    }
+
+    @Test("Writing regions truncate wrapped paste at character boundaries")
+    func writingRegionPasteLimit() throws {
+        let textView = try writingTextView(for: try region("pushbackTaxi"))
+        let pasted = String(repeating: "🙂", count: 1_000)
+        let accepted = try #require(fitting(pasted, in: textView))
+
+        #expect(!accepted.isEmpty)
+        #expect(accepted.count < pasted.count)
+        #expect(accepted.allSatisfy { $0 == "🙂" })
+
+        setText(accepted, in: textView)
+        #expect(fitting("🙂", in: textView, at: (accepted as NSString).length) == "")
+    }
+
+    @Test("Writing region replacement preserves existing suffix text")
+    func writingRegionReplacement() throws {
+        let textView = try writingTextView(for: try region("pushbackTaxi"), text: "HEAD\nTAIL")
+        let range = (textView.text as NSString).range(of: "HEAD")
+        let pasted = String(repeating: "X", count: 1_000)
+        let accepted = try #require(fitting(pasted, in: textView, replacing: range))
+        let result = (textView.text as NSString).replacingCharacters(in: range, with: accepted)
+
+        #expect(accepted.count < pasted.count)
+        #expect(result.hasSuffix("TAIL"))
+        #expect(fitting("", in: textView, replacing: range) == "")
     }
 
     private func roundTrip(_ document: PilotNoteDocument) throws -> PilotNoteDocument {
@@ -127,5 +175,61 @@ struct PilotNoteDocumentTests {
         FileWrapper(directoryWithFileWrappers: [
             "manifest.json": FileWrapper(regularFileWithContents: manifest)
         ])
+    }
+
+    private func region(_ id: String) throws -> NoteLayoutRegion {
+        try #require(NoteLayout.vatsimFlightCard.writingRegions.first { $0.id == id })
+    }
+
+    private func writingTextView(
+        for region: NoteLayoutRegion,
+        text: String = ""
+    ) throws -> UITextView {
+        let layout = NoteLayout.vatsimFlightCard
+        let pdf = try #require(layout.pdfURL.flatMap(PDFDocument.init(url:)))
+        let page = try #require(pdf.page(at: 0))
+        let pageBounds = page.bounds(for: .mediaBox)
+        let scale = pageBounds.height / CGFloat(layout.pageSize.height)
+        let font = UIFont(name: "Courier", size: CGFloat(region.fontSize ?? 8.5))
+            ?? UIFont.monospacedSystemFont(ofSize: 8.5, weight: .regular)
+        let lineHeight = CGFloat(region.baselineSpacing) * scale
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.minimumLineHeight = lineHeight
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .paragraphStyle: paragraph
+        ]
+        let textView = UITextView(frame: layout.pageRect(for: region.frame, in: pageBounds))
+        textView.isScrollEnabled = false
+        textView.textContainerInset = UIEdgeInsets(
+            top: max(0, CGFloat(region.firstBaselineOffset) * scale - lineHeight - font.descender),
+            left: scale,
+            bottom: 0,
+            right: scale
+        )
+        textView.textContainer.lineFragmentPadding = 0
+        textView.attributedText = NSAttributedString(string: text, attributes: attributes)
+        textView.typingAttributes = attributes
+        return textView
+    }
+
+    private func fitting(
+        _ replacement: String,
+        in textView: UITextView,
+        at location: Int = 0,
+        replacing range: NSRange? = nil
+    ) -> String? {
+        WritingRegionTextLimiter.fittingReplacement(
+            replacement,
+            in: textView,
+            replacing: range ?? NSRange(location: location, length: 0)
+        )
+    }
+
+    private func setText(_ text: String, in textView: UITextView) {
+        textView.attributedText = NSAttributedString(
+            string: text,
+            attributes: textView.typingAttributes
+        )
     }
 }

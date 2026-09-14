@@ -25,6 +25,7 @@
 - Prefer SwiftUI, Observation, and Apple platform frameworks in the native app. Do not add a DI framework or storage abstraction before it is needed.
 - Layout definitions own field geometry, labels, and writing regions. Notes own entered values, annotations, and user assets in layout coordinates. Saving preserves editable content; PDF export is a separate representation.
 - Native editing and export must use the same layout geometry. Imported logos are stored as aspect-fitted PNG data and PDF export stays entirely on-device.
+- The native card editor uses one zooming `UIScrollView` with a tiled PDF background and persistent UIKit text controls. `UIKeyboardLayoutGuide` owns keyboard avoidance; only Done ends an editing session and resets zoom.
 - A note stores its layout ID and revision. Never silently apply changed geometry to existing annotations.
 - The `.pilotnote` package format stores editable values in `manifest.json` and an optional aspect-fitted logo in `logo.png`. The document filename is the note name and must not be duplicated in the manifest.
 - Keep code straightforward and untangled so it can grow without speculative generalization.
