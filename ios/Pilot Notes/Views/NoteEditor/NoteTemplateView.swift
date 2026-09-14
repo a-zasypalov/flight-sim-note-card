@@ -28,7 +28,6 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
     private var template: NoteTemplateView
     private var hasEditingSession = false
     private var fittedSize = CGSize.zero
-    private var isCaretUpdateScheduled = false
 
     init(template: NoteTemplateView) {
         self.template = template
@@ -66,13 +65,14 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
             onWritingRegionChange: template.onWritingRegionChange,
             onPickLogo: template.onPickLogo,
             onDropLogo: template.onDropLogo,
-            onFocus: { [weak self] in
+            onFocus: { [weak self] fitsWidth in
                 guard let self else { return }
                 hasEditingSession = true
                 self.template.isEditing = true
-                scheduleCaretReveal()
+                if fitsWidth && scrollView.zoomScale > widthFitScale {
+                    scrollView.setZoomScale(widthFitScale, animated: true)
+                }
             },
-            onCaretChange: { [weak self] in self?.scheduleCaretReveal() },
             onDone: { [weak self] in self?.template.isEditing = false }
         )
         pageView.addSubview(overlayView)
@@ -107,6 +107,12 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
         return min(available.width / pageView.bounds.width, available.height / pageView.bounds.height)
     }
 
+    private var widthFitScale: CGFloat {
+        guard pageView.bounds.width > 0 else { return 1 }
+        return bounds.inset(by: safeAreaInsets).insetBy(dx: 12, dy: 12).width
+            / pageView.bounds.width
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         guard bounds.width > 0, bounds.height > 0, overlayView != nil else { return }
@@ -121,7 +127,6 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
             }
         }
         centerPage()
-        scheduleCaretReveal()
     }
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -139,31 +144,12 @@ final class NoteCanvasView: UIView, UIScrollViewDelegate {
     private func centerPage() {
         let horizontal = max(12, (scrollView.bounds.width - scrollView.contentSize.width) / 2)
         let vertical = max(12, (scrollView.bounds.height - scrollView.contentSize.height) / 2)
-        scrollView.contentInset = UIEdgeInsets(
+        let insets = UIEdgeInsets(
             top: vertical, left: horizontal, bottom: vertical, right: horizontal
         )
-    }
-
-    private func scheduleCaretReveal() {
-        guard !isCaretUpdateScheduled else { return }
-        isCaretUpdateScheduled = true
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            isCaretUpdateScheduled = false
-            revealCaret()
+        if scrollView.contentInset != insets {
+            scrollView.contentInset = insets
         }
-    }
-
-    func revealCaret() {
-        guard !scrollView.isZooming, !scrollView.isDragging,
-              let view = overlayView?.focusedView,
-              let input = view as? UITextInput,
-              let selection = input.selectedTextRange else { return }
-        view.layoutIfNeeded()
-        let rect = view.convert(input.caretRect(for: selection.end), to: scrollView)
-            .insetBy(dx: -16, dy: -12)
-        guard !scrollView.bounds.contains(rect) else { return }
-        scrollView.scrollRectToVisible(rect, animated: false)
     }
 }
 
@@ -207,11 +193,8 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     private var logoView: LogoDropView?
     private var onFieldChange: (NoteLayoutField.ID, String) -> Void
     private var onWritingRegionChange: (NoteLayoutRegion.ID, String) -> Void
-    private let onFocus: () -> Void
-    private let onCaretChange: () -> Void
+    private let onFocus: (Bool) -> Void
     private let onDone: () -> Void
-    private var currentContentScale: CGFloat = 1
-    private var isContentScaleUpdateScheduled = false
 
     init(
         layout: NoteLayout,
@@ -223,8 +206,7 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         onWritingRegionChange: @escaping (NoteLayoutRegion.ID, String) -> Void,
         onPickLogo: @escaping () -> Void,
         onDropLogo: @escaping (UIImage) -> Void,
-        onFocus: @escaping () -> Void,
-        onCaretChange: @escaping () -> Void,
+        onFocus: @escaping (Bool) -> Void,
         onDone: @escaping () -> Void
     ) {
         self.layout = layout
@@ -232,7 +214,6 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         self.onFieldChange = onFieldChange
         self.onWritingRegionChange = onWritingRegionChange
         self.onFocus = onFocus
-        self.onCaretChange = onCaretChange
         self.onDone = onDone
         super.init(frame: pageBounds)
         backgroundColor = .clear
@@ -317,11 +298,6 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         return nil
     }
 
-    var focusedView: UIView? {
-        fieldViews.first(where: \.isFirstResponder)
-            ?? writingRegionViews.first(where: \.isFirstResponder)
-    }
-
     func update(
         fieldValues: [NoteLayoutField.ID: String],
         writingRegionValues: [NoteLayoutRegion.ID: String],
@@ -333,14 +309,12 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     ) {
         self.onFieldChange = onFieldChange
         self.onWritingRegionChange = onWritingRegionChange
-        var textChanged = false
 
         for (index, textField) in fieldViews.enumerated() where !textField.isFirstResponder {
             let field = layout.fields[index]
             let text = displayed(fieldValues[field.id] ?? "", for: field)
             if textField.text != text {
                 textField.text = text
-                textChanged = true
             }
         }
 
@@ -349,17 +323,12 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
             let text = writingRegionValues[region.id] ?? ""
             if textView.text != text {
                 setWritingText(text, in: textView, for: region)
-                textChanged = true
             }
         }
 
         logoView?.onTap = onPickLogo
         logoView?.onDrop = onDropLogo
         logoView?.setImage(data: logoData)
-
-        if textChanged {
-            scheduleContentScaleUpdate()
-        }
     }
 
     @objc private func fieldChanged(_ textField: UITextField) {
@@ -374,7 +343,14 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
 
     func textViewDidChange(_ textView: UITextView) {
         onWritingRegionChange(layout.writingRegions[textView.tag].id, textView.text)
-        onCaretChange()
+    }
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        onFocus(false)
+    }
+
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        onFocus(true)
     }
 
     func textView(
@@ -396,34 +372,6 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
         textView.replace(selection, withText: replacement)
         textViewDidChange(textView)
         return false
-    }
-
-    func textViewDidChangeSelection(_ textView: UITextView) {
-        guard textView.isFirstResponder else { return }
-        onCaretChange()
-    }
-
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        guard textField.isFirstResponder else { return }
-        onCaretChange()
-    }
-
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        scheduleContentScaleUpdate()
-        onFocus()
-    }
-
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        scheduleContentScaleUpdate()
-    }
-
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        scheduleContentScaleUpdate()
-        onFocus()
-    }
-
-    func textViewDidEndEditing(_ textView: UITextView) {
-        scheduleContentScaleUpdate()
     }
 
     private func setWritingText(
@@ -456,29 +404,11 @@ private final class NoteEditorOverlayView: UIView, UITextFieldDelegate, UITextVi
     }
 
     func updateContentScale(_ scale: CGFloat) {
-        currentContentScale = scale
         for view in fieldViews {
-            updateContentScale(scale, in: view)
+            view.contentScaleFactor = scale
         }
         for view in writingRegionViews {
-            updateContentScale(scale, in: view)
-        }
-    }
-
-    private func updateContentScale(_ scale: CGFloat, in view: UIView) {
-        view.contentScaleFactor = scale
-        view.layer.contentsScale = scale
-        view.setNeedsDisplay()
-        view.subviews.forEach { updateContentScale(scale, in: $0) }
-    }
-
-    private func scheduleContentScaleUpdate() {
-        guard !isContentScaleUpdateScheduled else { return }
-        isContentScaleUpdateScheduled = true
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            isContentScaleUpdateScheduled = false
-            updateContentScale(currentContentScale)
+            view.contentScaleFactor = scale
         }
     }
 
@@ -513,7 +443,6 @@ private final class WritingTextView: UITextView {
             let font = typingAttributes[.font] as? UIFont,
             rect.height > font.lineHeight
         else { return rect }
-        // Ruled line height adds space above the glyphs, not below their baseline.
         rect.origin.y = rect.maxY - font.lineHeight
         rect.size.height = font.lineHeight
         return rect
