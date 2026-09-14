@@ -178,9 +178,6 @@ private struct PDFNoteTemplateView: UIViewRepresentable {
                 scrollView.contentInset.top += delta
                 scrollView.contentInset.bottom += delta
                 scrollView.verticalScrollIndicatorInsets.bottom += delta
-                if overlap > 0, let focusedView = self.overlayView?.focusedView {
-                    self.reveal(focusedView, animated: false)
-                }
             }
         }
 
