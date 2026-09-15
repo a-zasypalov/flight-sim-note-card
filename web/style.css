@@ -65,6 +65,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body { margin: 0; background: var(--page); }
 
@@ -222,11 +223,13 @@ button { border: 0; border-radius: 7px; cursor: pointer; font-weight: 700; }
 
 .preview-logo { position: absolute; object-fit: contain; }
 
-.preview-value, .preview-value-large { position: absolute; color: #292929; font-family: 'Courier New', Courier, monospace; font-weight: 600; line-height: 1.25; white-space: nowrap; }
+.preview-value, .preview-value-large, .preview-value-route { position: absolute; color: #292929; font-family: 'Courier New', Courier, monospace; font-weight: 600; line-height: 1.25; white-space: nowrap; }
 
 .preview-value { font-size: 1.3cqh; }
 
 .preview-value-large { font-size: 1.5cqh; }
+
+.preview-value-route { font-size: .74cqh; }
 
 .preview-panel > .hint { margin: 12px 0 0; text-align: right; }
 
@@ -239,6 +242,50 @@ dialog::backdrop { background: var(--backdrop); }
 .dialog-heading h2 { margin-bottom: 8px; }
 
 .dialog-heading p { margin-bottom: 18px; color: var(--copy); font-size: .9rem; }
+
+.simbrief-import { padding: 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--drop); }
+
+.simbrief-heading, .simbrief-current, .simbrief-actions { display: flex; align-items: center; gap: 10px; }
+
+.simbrief-heading { justify-content: space-between; margin-bottom: 11px; }
+
+.simbrief-heading h3 { font-size: 1rem; }
+
+.simbrief-connect label { display: block; margin-bottom: 6px; color: var(--copy); font-size: .78rem; font-weight: 700; }
+
+.simbrief-connect-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+
+#simbrief-username { min-width: 0; padding: 9px 10px; border: 1px solid var(--input-border); border-radius: 7px; background: var(--input); color: var(--ink); font-size: 1rem; }
+
+#simbrief-username:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.simbrief-current { justify-content: space-between; }
+
+.simbrief-current p { margin: 0; color: var(--copy); font-size: .83rem; line-height: 1.4; white-space: pre-line; }
+
+.simbrief-actions { flex: 0 0 auto; }
+
+.simbrief-actions .download { width: auto; margin: 0; padding: 9px 13px; }
+
+.icon-button { display: grid; width: 32px; height: 32px; padding: 0; place-items: center; border-radius: 6px; background: transparent; color: var(--copy); }
+
+.icon-button:hover { background: var(--selected); color: var(--ink); }
+
+.icon-button:disabled { cursor: wait; opacity: .65; }
+
+.icon-button svg { width: 16px; height: 16px; }
+
+.text-button { padding: 2px; background: transparent; color: var(--copy); font-size: .76rem; }
+
+.secondary:disabled { cursor: wait; opacity: .65; }
+
+.simbrief-import .fpl-error { min-height: 0; margin: 8px 0 0; }
+
+.simbrief-import .fpl-error:empty { display: none; }
+
+.import-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+
+.import-divider::before, .import-divider::after { flex: 1; border-top: 1px solid var(--border); content: ""; }
 
 #fpl-input { display: block; width: 100%; min-height: 210px; padding: 12px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input); color: var(--ink); font-family: "SFMono-Regular", Consolas, monospace; font-size: .82rem; line-height: 1.45; resize: vertical; }
 
@@ -254,5 +301,11 @@ dialog::backdrop { background: var(--backdrop); }
   .app-shell { padding: 28px 16px; }
   .app-grid { grid-template-columns: 1fr; }
   .preview-panel { order: -1; }
+  .simbrief-current { align-items: flex-start; flex-direction: column; }
+  .simbrief-actions { align-self: flex-end; }
   #fpl-input { font-size: 16px; }
+}
+
+@media (max-width: 460px) {
+  .simbrief-connect-row { grid-template-columns: 1fr; }
 }

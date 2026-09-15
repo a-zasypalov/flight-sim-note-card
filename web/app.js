@@ -1,4 +1,5 @@
 import { parseIcaoFlightPlan } from "./flight-plan.js";
+import { fetchSimBriefFlightPlan } from "./simbrief.js";
 import { FORMATS, MM_TO_PT } from "./templates.js";
 
 const formatInputs = document.querySelectorAll('input[name="format"]');
@@ -19,10 +20,22 @@ const fplForm = document.querySelector("#fpl-form");
 const fplInput = document.querySelector("#fpl-input");
 const fplError = document.querySelector("#fpl-error");
 const fplCancel = document.querySelector("#fpl-cancel");
+const simbriefConnect = document.querySelector("#simbrief-connect");
+const simbriefCurrent = document.querySelector("#simbrief-current");
+const simbriefUsername = document.querySelector("#simbrief-username");
+const simbriefLoad = document.querySelector("#simbrief-load");
+const simbriefPrompt = document.querySelector("#simbrief-prompt");
+const simbriefImport = document.querySelector("#simbrief-import");
+const simbriefRefresh = document.querySelector("#simbrief-refresh");
+const simbriefChange = document.querySelector("#simbrief-change");
+const simbriefError = document.querySelector("#simbrief-error");
 const themeToggles = document.querySelectorAll(".theme-toggle button");
 const systemTheme = matchMedia("(prefers-color-scheme: dark)");
 const state = { format: "a4", logo: null, url: null, plans: [null, null] };
+const SIMBRIEF_USERNAME_KEY = "pilot-notes-simbrief-username";
 let activePlan = 0;
+let simbriefPlan;
+let simbriefController;
 let controlsTimeout;
 let controlLayoutTimeout;
 let transitionPaper;
@@ -62,12 +75,13 @@ function updatePreview(format) {
     const text = state.plans[index]?.[key];
     if (!text) return [];
     const value = document.createElement("span");
-    value.className = ["callsign", "aircraft", "origin", "destination", "alternate", "cruise"].includes(key) ? "preview-value-large" : "preview-value";
+    value.className = key === "inFlightRoute" ? "preview-value-route" : ["callsign", "aircraft", "origin", "destination", "alternate", "cruise"].includes(key) ? "preview-value-large" : "preview-value";
     value.textContent = text;
     value.style.left = `${box.x / spec.page[0] * 100}%`;
     value.style.bottom = `${box.y / spec.page[1] * 100}%`;
     value.style.width = `${box.width / spec.page[0] * 100}%`;
     value.style.textAlign = box.align;
+    if (key === "inFlightRoute") value.style.fontSize = `${Math.min(.74, box.width / spec.page[0] * 100 / (text.length * .6))}cqw`;
     return value;
   })));
 }
@@ -258,13 +272,95 @@ function replaceFlightSlot(index) {
   fplSlots.children[index]?.replaceWith(flightSlot(index));
 }
 
+function savedSimBriefUsername() {
+  try {
+    return localStorage.getItem(SIMBRIEF_USERNAME_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function showSimBriefUser() {
+  simbriefController?.abort();
+  simbriefPlan = null;
+  simbriefConnect.hidden = false;
+  simbriefCurrent.hidden = !username;
+  simbriefChange.hidden = !username;
+  simbriefError.textContent = "";
+  simbriefUsername.focus();
+}
+
+async function loadSimBriefPlan(username = simbriefUsername.value) {
+  const user = username.trim();
+  if (!user) {
+    simbriefError.textContent = "Enter your SimBrief username.";
+    simbriefUsername.focus();
+    return;
+  }
+  simbriefController?.abort();
+  const controller = new AbortController();
+  const fromInput = !simbriefConnect.hidden;
+  simbriefController = controller;
+  simbriefPlan = null;
+  simbriefError.textContent = "";
+  simbriefLoad.disabled = true;
+  simbriefLoad.textContent = "Loading...";
+  simbriefImport.disabled = true;
+  simbriefRefresh.disabled = true;
+  if (!fromInput) simbriefPrompt.textContent = "Checking SimBrief...";
+  try {
+    const plan = await fetchSimBriefFlightPlan(user, controller.signal);
+    if (simbriefController !== controller) return;
+    try {
+      localStorage.setItem(SIMBRIEF_USERNAME_KEY, user);
+    } catch {}
+    simbriefUsername.value = user;
+    simbriefPlan = plan;
+    simbriefConnect.hidden = true;
+    simbriefCurrent.hidden = false;
+    simbriefChange.hidden = false;
+    simbriefPrompt.textContent = `Import current flight plan?\n[${plan.callsign}, ${plan.origin}–${plan.destination}]`;
+    simbriefImport.disabled = false;
+    simbriefImport.focus();
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    simbriefError.textContent = error.message;
+    if (!fromInput) simbriefPrompt.textContent = "Current SimBrief plan unavailable.";
+  } finally {
+    if (simbriefController === controller) {
+      simbriefController = null;
+      simbriefLoad.disabled = false;
+      simbriefLoad.textContent = "Load current plan";
+      simbriefRefresh.disabled = false;
+    }
+  }
+}
+
+function importFlightPlan(plan) {
+  state.plans[activePlan] = plan;
+  fplDialog.close();
+  replaceFlightSlot(activePlan);
+  updatePreviews();
+}
+
 function openFplDialog(index) {
   activePlan = index;
   fplTitle.textContent = `Import ICAO FPL`;
   fplInput.value = state.plans[index]?.source || "";
   fplError.textContent = "";
+  simbriefError.textContent = "";
+  simbriefPlan = null;
+  const username = savedSimBriefUsername();
+  simbriefUsername.value = username;
+  simbriefConnect.hidden = Boolean(username);
+  simbriefCurrent.hidden = !username;
+  simbriefChange.hidden = !username;
+  simbriefImport.disabled = !username;
+  simbriefPrompt.textContent = username ? "Checking SimBrief..." : "";
   fplDialog.showModal();
-  fplInput.focus();
+  if (username) loadSimBriefPlan(username);
+  else simbriefUsername.focus();
+  if (username || fplInput.value) fplInput.focus();
 }
 
 async function logoPng() {
@@ -300,9 +396,9 @@ async function buildPdf() {
   format.cards.forEach((card, index) => Object.entries(card.valueBoxes).forEach(([key, box]) => {
     const text = state.plans[index]?.[key];
     if (!text) return;
-    const size = box.size;
-    const width = font.widthOfTextAtSize(text, size);
     const boxWidth = box.width * MM_TO_PT;
+    const size = key === "inFlightRoute" ? Math.min(box.size, boxWidth / font.widthOfTextAtSize(text, 1)) : box.size;
+    const width = font.widthOfTextAtSize(text, size);
     const x = box.x * MM_TO_PT + (box.align === "center" ? (boxWidth - width) / 2 : box.align === "right" ? boxWidth - width : 0);
     page.drawText(text, { x, y: box.y * MM_TO_PT, size, font, color: rgb(.16, .16, .16) });
   }));
@@ -365,6 +461,17 @@ fplSlots.addEventListener("click", (event) => {
   openFplDialog(index);
 });
 fplCancel.addEventListener("click", () => fplDialog.close());
+fplDialog.addEventListener("close", () => simbriefController?.abort());
+simbriefLoad.addEventListener("click", () => loadSimBriefPlan());
+simbriefRefresh.addEventListener("click", () => loadSimBriefPlan(simbriefUsername.value));
+simbriefChange.addEventListener("click", showSimBriefUser);
+simbriefImport.addEventListener("click", () => simbriefPlan && importFlightPlan(simbriefPlan));
+simbriefUsername.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    loadSimBriefPlan();
+  }
+});
 fplInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
     event.preventDefault();
@@ -374,10 +481,7 @@ fplInput.addEventListener("keydown", (event) => {
 fplForm.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
-    state.plans[activePlan] = parseIcaoFlightPlan(fplInput.value);
-    fplDialog.close();
-    replaceFlightSlot(activePlan);
-    updatePreviews();
+    importFlightPlan(parseIcaoFlightPlan(fplInput.value));
   } catch (error) {
     fplError.textContent = error.message;
   }

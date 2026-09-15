@@ -17,7 +17,10 @@ function card(x, width) {
       destination: value(originStart + originDest / 2 + 1, 184.3, originDest / 2 - 2, "center"),
       alternate: value(x + width - 25, 184.3, 20, "center"),
       squawk: value(x + 4 + inner * .63 + 1, 169.3, inner * .18 - 2, "center"),
-      cruise: value(x + 4 + inner * .75 + 1, 159.3, inner * .25 - 2, "center")
+      departureRunway: value(x + 4 + inner * .81 + 1, 169.3, inner * .19 - 2, "center"),
+      sid: value(x + 5, 159.3, inner * .25 - 2, "center"),
+      cruise: value(x + 4 + inner * .75 + 1, 159.3, inner * .25 - 2, "center"),
+      inFlightRoute: value(x + 5, 116.3, inner - 2, "left", 4.2)
     }
   };
 }

@@ -28,7 +28,7 @@
         </div>
         <p class="eyebrow">HANDY FOR VATSIM PILOTS</p>
         <h1><img class="app-icon" src="/app-icon.png" alt="" /><span class="app-title">Pilot Notes</span></h1>
-        <p style="margin-left: 4px;">Create a print-ready note card. Generated in your browser, no data transfered.</p>
+        <p style="margin-left: 4px;">Create a print-ready note card. PDFs stay local; SimBrief imports connect directly to SimBrief.</p>
       </header>
 
       <div class="app-grid">
@@ -102,8 +102,30 @@
       <form id="fpl-form" class="dialog-form">
         <div class="dialog-heading">
           <h2 id="fpl-title">Import ICAO FPL</h2>
-          <p>Paste a complete ICAO flight plan.</p>
+          <p>Load your current SimBrief plan or paste a complete ICAO flight plan.</p>
         </div>
+        <section class="simbrief-import" aria-labelledby="simbrief-title">
+          <div class="simbrief-heading">
+            <h3 id="simbrief-title">SimBrief</h3>
+            <button id="simbrief-change" class="text-button" type="button" hidden>Change user</button>
+          </div>
+          <div id="simbrief-connect" class="simbrief-connect">
+            <label for="simbrief-username">SimBrief username</label>
+            <div class="simbrief-connect-row">
+              <input id="simbrief-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" />
+              <button id="simbrief-load" class="secondary" type="button">Load current plan</button>
+            </div>
+          </div>
+          <div id="simbrief-current" class="simbrief-current" hidden>
+            <p id="simbrief-prompt"></p>
+            <div class="simbrief-actions">
+              <button id="simbrief-refresh" class="icon-button" type="button" aria-label="Refresh current SimBrief plan" title="Refresh current SimBrief plan"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/><path d="M3 12A9 9 0 0 1 18.4 5.6L21 8"/><path d="M21 3v5h-5"/></svg></button>
+              <button id="simbrief-import" class="download" type="button">Import</button>
+            </div>
+          </div>
+          <p id="simbrief-error" class="fpl-error" role="alert"></p>
+        </section>
+        <div class="import-divider"><span>or paste ICAO FPL</span></div>
         <textarea id="fpl-input" aria-describedby="fpl-help fpl-error" autocapitalize="characters" enterkeyhint="done" spellcheck="false" placeholder="(FPL-RYR421-IS ... )" required></textarea>
         <p id="fpl-error" class="fpl-error" role="alert"></p>
         <div class="dialog-actions">
