@@ -245,7 +245,7 @@ function flightSlot(index) {
   slotHeading.className = "fpl-slot-heading";
   slotHeading.append(heading);
   if (!plan) {
-    slotHeading.append(action("Import ICAO FPL", "import", index));
+    slotHeading.append(action("Import FPL", "import", index));
     slot.append(slotHeading);
     return slot;
   }
@@ -345,7 +345,7 @@ function importFlightPlan(plan) {
 
 function openFplDialog(index) {
   activePlan = index;
-  fplTitle.textContent = `Import ICAO FPL`;
+  fplTitle.textContent = `Import FPL`;
   fplInput.value = state.plans[index]?.source || "";
   fplError.textContent = "";
   simbriefError.textContent = "";
