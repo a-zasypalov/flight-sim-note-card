@@ -298,16 +298,12 @@ dialog::backdrop { background: var(--backdrop); }
 .dialog-actions .download { width: auto; margin: 0; padding: 9px 14px; }
 
 @media (max-width: 760px) {
-  .app-shell { padding: 28px 16px; }
+  .app-shell { max-width: 100%; padding: 28px 16px; }
   .app-grid { grid-template-columns: 1fr; }
   .preview-panel { order: -1; }
   .simbrief-current { align-items: flex-start; flex-direction: column; }
   .simbrief-actions { align-self: flex-end; }
   #fpl-input { font-size: 16px; }
-}
-
-@media (max-width: 760px) and (orientation: portrait) {
-  .app-shell { max-width: 100%; }
 }
 
 @media (max-width: 460px) {

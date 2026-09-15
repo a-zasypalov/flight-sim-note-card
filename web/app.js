@@ -284,17 +284,15 @@ function showSimBriefUser() {
   simbriefController?.abort();
   simbriefPlan = null;
   simbriefConnect.hidden = false;
-  simbriefCurrent.hidden = !username;
-  simbriefChange.hidden = !username;
+  simbriefCurrent.hidden = true;
+  simbriefChange.hidden = true;
   simbriefError.textContent = "";
-  simbriefUsername.focus();
 }
 
 async function loadSimBriefPlan(username = simbriefUsername.value) {
   const user = username.trim();
   if (!user) {
     simbriefError.textContent = "Enter your SimBrief username.";
-    simbriefUsername.focus();
     return;
   }
   simbriefController?.abort();
@@ -355,12 +353,10 @@ function openFplDialog(index) {
   simbriefConnect.hidden = Boolean(username);
   simbriefCurrent.hidden = !username;
   simbriefChange.hidden = !username;
-  simbriefImport.disabled = !username;
+  simbriefImport.disabled = true;
   simbriefPrompt.textContent = username ? "Checking SimBrief..." : "";
   fplDialog.showModal();
   if (username) loadSimBriefPlan(username);
-  else simbriefUsername.focus();
-  if (username || fplInput.value) fplInput.focus();
 }
 
 async function logoPng() {
