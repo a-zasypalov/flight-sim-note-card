@@ -4,6 +4,14 @@ function value(input) {
   return typeof input === "string" || typeof input === "number" ? String(input).trim() : "";
 }
 
+function fuelWeight(input, units) {
+  const amount = value(input);
+  const unit = value(units).toLowerCase();
+  if (!/^\d+(?:\.\d+)?$/.test(amount) || !["kgs", "lbs"].includes(unit)) return "";
+  const number = Number(amount);
+  return Number.isFinite(number) ? `${(number / 1000).toFixed(1)} ${unit === "kgs" ? "t" : "klb"}` : "";
+}
+
 function list(input) {
   return Array.isArray(input) ? input : input && typeof input === "object" ? [input] : [];
 }
@@ -47,6 +55,7 @@ export function parseSimBriefFlightPlan(data) {
   const flightCallsign = airline && flightNumber ? `${airline}${flightNumber}` : "";
   const sid = procedure(data, "sid");
   const star = procedure(data, "star");
+  const costIndex = value(data.general?.costindex).toUpperCase();
   const plan = {
     source: value(data.atc?.flight_plan),
     callsign: value(data.atc?.callsign) || flightCallsign || value(data.aircraft?.reg),
@@ -59,7 +68,12 @@ export function parseSimBriefFlightPlan(data) {
     sid,
     cruise: formatAltitude(data.general?.initial_altitude),
     departureRunway: value(data.origin?.plan_rwy),
-    inFlightRoute: routeLine(data, sid, star)
+    inFlightRoute: routeLine(data, sid, star),
+    zfw: fuelWeight(data.weights?.est_zfw, data.general?.units),
+    cg: "",
+    blockFuel: fuelWeight(data.fuel?.plan_ramp, data.general?.units),
+    reserveFuel: fuelWeight(data.fuel?.reserve, data.general?.units),
+    costIndex: /^(?:\d+|AUTO)$/.test(costIndex) ? costIndex : ""
   };
   if (!plan.callsign || !plan.aircraft || !plan.origin || !plan.destination) {
     throw new Error("The latest SimBrief flight plan is incomplete.");

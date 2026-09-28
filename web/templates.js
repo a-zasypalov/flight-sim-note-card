@@ -1,5 +1,6 @@
-function card(x, width) {
+function card(x, width, withFuel = false) {
   const inner = width - 8;
+  const departureShift = withFuel ? -15 : 0;
   const header = width - 51;
   const originDest = width - 4 - 22 - (4 + 28);
   const originStart = x + 32;
@@ -16,17 +17,22 @@ function card(x, width) {
       origin: value(originStart + 1, 184.3, originDest / 2 - 2, "center"),
       destination: value(originStart + originDest / 2 + 1, 184.3, originDest / 2 - 2, "center"),
       alternate: value(x + width - 25, 184.3, 20, "center"),
-      squawk: value(x + 4 + inner * .63 + 1, 169.3, inner * .18 - 2, "center"),
-      departureRunway: value(x + 4 + inner * .81 + 1, 169.3, inner * .19 - 2, "center"),
-      sid: value(x + 5, 159.3, inner * .25 - 2, "center"),
-      cruise: value(x + 4 + inner * .75 + 1, 159.3, inner * .25 - 2, "center"),
-      inFlightRoute: value(x + 5, 116.3, inner - 2, "left", 4.2)
+      squawk: value(x + 4 + inner * .63 + 1, 169.3 + departureShift, inner * .18 - 2, "center"),
+      departureRunway: value(x + 4 + inner * .81 + 1, 169.3 + departureShift, inner * .19 - 2, "center"),
+      sid: value(x + 5, 159.3 + departureShift, inner * .25 - 2, "center"),
+      cruise: value(x + 4 + inner * .75 + 1, 159.3 + departureShift, inner * .25 - 2, "center"),
+      inFlightRoute: value(x + 5, 116.3 + departureShift, inner - 2, "left", 4.2),
+      ...(withFuel ? Object.fromEntries(["zfw", "cg", "blockFuel", "reserveFuel", "costIndex"].map((key, index) =>
+        [key, value(x + 5 + inner * .2 * index, 169.3, inner * .2 - 2, "center")]
+      )) : {})
     }
   };
 }
 
 const a4Cards = [card(5, 138.5), card(153.5, 138.5)];
 const a5Cards = [card(5, 138)];
+const a4FuelCards = [card(5, 138.5, true), card(153.5, 138.5, true)];
+const a5FuelCards = [card(5, 138, true)];
 
 export const FORMATS = {
   a4: {
@@ -36,6 +42,12 @@ export const FORMATS = {
     preview: "/templates/vatsim-flight-card-a4.png",
     filename: "vatsim-flight-card-a4.pdf",
     cards: a4Cards,
+    fuel: {
+      template: "/templates/vatsim-flight-card-fuel-a4.pdf",
+      preview: "/templates/vatsim-flight-card-fuel-a4.png",
+      filename: "vatsim-flight-card-fuel-a4.pdf",
+      cards: a4FuelCards
+    },
     logoBoxes: a4Cards.map(({ logoBox }) => logoBox)
   },
   a5: {
@@ -45,6 +57,12 @@ export const FORMATS = {
     preview: "/templates/vatsim-flight-card-a5.png",
     filename: "vatsim-flight-card-a5.pdf",
     cards: a5Cards,
+    fuel: {
+      template: "/templates/vatsim-flight-card-fuel-a5.pdf",
+      preview: "/templates/vatsim-flight-card-fuel-a5.png",
+      filename: "vatsim-flight-card-fuel-a5.pdf",
+      cards: a5FuelCards
+    },
     logoBoxes: a5Cards.map(({ logoBox }) => logoBox)
   }
 };

@@ -18,6 +18,11 @@ assert.equal(FORMATS.a5.cards[0].valueBoxes.departureRunway.x.toFixed(1), "115.3
 assert.equal(FORMATS.a5.cards[0].valueBoxes.sid.y, 159.3);
 assert.equal(FORMATS.a5.cards[0].valueBoxes.inFlightRoute.y, 116.3);
 assert.equal(FORMATS.a4.cards[1].valueBoxes.inFlightRoute.x - FORMATS.a4.cards[0].valueBoxes.inFlightRoute.x, 148.5);
+assert.equal(FORMATS.a5.fuel.cards[0].valueBoxes.zfw.y, 169.3);
+assert.equal(FORMATS.a5.fuel.cards[0].valueBoxes.inFlightRoute.y, 101.3);
+assert.equal(FORMATS.a5.fuel.cards[0].valueBoxes.squawk.y, 154.3);
+assert.equal(FORMATS.a4.fuel.cards[1].valueBoxes.zfw.x - FORMATS.a4.fuel.cards[0].valueBoxes.zfw.x, 148.5);
+assert.equal(FORMATS.a5.cards[0].valueBoxes.zfw, undefined);
 
 const imported = parseIcaoFlightPlan(`(FPL-RYR421-IS
 -CRJ9/M-SDFGIRWY/S
@@ -45,12 +50,14 @@ assert.throws(() => parseIcaoFlightPlan("(FPL-ABC123-IS-A320/M-S/S-EGLL1200-N045
 const simbrief = {
   fetch: { status: "Success" },
   atc: { callsign: "OCN5MA", flight_plan: "(FPL-OCN5MA-IS...)" },
-  general: { icao_airline: "OCN", flight_number: "5MA", initial_altitude: "37000", route: "DCT MAGEE DCT BLACA" },
+  general: { icao_airline: "OCN", flight_number: "5MA", initial_altitude: "37000", route: "DCT MAGEE DCT BLACA", units: "kgs", costindex: "0" },
   aircraft: { icaocode: "A20N", reg: "D-AABC" },
   times: { sched_out: Date.UTC(2026, 8, 2, 12) / 1000 },
   origin: { icao_code: "ENBG", plan_rwy: "17" },
   destination: { icao_code: "EDDL", plan_rwy: "23L" },
   alternate: { icao_code: "EDDK" },
+  weights: { est_zfw: "60400" },
+  fuel: { plan_ramp: "7300", reserve: "1200" },
   navlog: { fix: [{ is_sid_star: "1", via_airway: "MAGEE1A", stage: "CLB" }, { is_sid_star: "1", via_airway: "BLACA2B", stage: "DES" }] }
 };
 const simbriefImported = parseSimBriefFlightPlan(simbrief);
@@ -66,8 +73,22 @@ assert.deepEqual(simbriefImported, {
   sid: "MAGEE1A",
   cruise: "FL 370",
   departureRunway: "17",
-  inFlightRoute: "ENBG/17 MAGEE1A DCT MAGEE DCT BLACA BLACA2B EDDL/23L"
+  inFlightRoute: "ENBG/17 MAGEE1A DCT MAGEE DCT BLACA BLACA2B EDDL/23L",
+  zfw: "60.4 t",
+  cg: "",
+  blockFuel: "7.3 t",
+  reserveFuel: "1.2 t",
+  costIndex: "0"
 });
+const pounds = parseSimBriefFlightPlan({
+  ...simbrief,
+  general: { ...simbrief.general, units: "lbs" },
+  weights: { est_zfw: "133100" },
+  fuel: { plan_ramp: "17000", reserve: "3000" }
+});
+assert.deepEqual([pounds.zfw, pounds.blockFuel, pounds.reserveFuel], ["133.1 klb", "17.0 klb", "3.0 klb"]);
+const missing = parseSimBriefFlightPlan({ ...simbrief, weights: {}, fuel: {}, general: { ...simbrief.general, costindex: "invalid" } });
+assert.deepEqual([missing.zfw, missing.cg, missing.blockFuel, missing.reserveFuel, missing.costIndex], ["", "", "", "", ""]);
 assert.equal(parseSimBriefFlightPlan({ ...simbrief, atc: {}, general: { ...simbrief.general, initial_altitude: "F370" } }).callsign, "OCN5MA");
 assert.deepEqual(
   (({ alternate, departureRunway, inFlightRoute }) => ({ alternate, departureRunway, inFlightRoute }))(

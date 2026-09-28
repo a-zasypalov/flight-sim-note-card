@@ -121,6 +121,17 @@
     \Field{\altnStart}{177mm}{\altnW}{10mm}{ALTN}
     \Marker{\routeSlashX}{179mm}{/}
 
+    \def\departureShift{0mm}
+    \ifdefined\FuelSectionEnabled
+      \Band{172mm}{FUEL / WEIGHT}
+      \Field{4mm}{162mm}{.2\innerW}{10mm}{ZFW}
+      \Field{\dimexpr4mm+.4\innerW\relax}{162mm}{.2\innerW}{10mm}{BLOCK}
+      \Field{\dimexpr4mm+.6\innerW\relax}{162mm}{.2\innerW}{10mm}{RESERVES}
+      \Field{\dimexpr4mm+.8\innerW\relax}{162mm}{.2\innerW}{10mm}{CI}
+      \Field{\dimexpr4mm+.2\innerW\relax}{162mm}{.2\innerW}{10mm}{CG}
+      \def\departureShift{-15mm}
+    \fi
+    \begin{scope}[yshift=\departureShift]
     \Band{172mm}{DEPARTURE}
     \Field{4mm}{162mm}{\depAtisFreq}{10mm}{ATIS FREQ / INFO}
     \Marker{\depAtisSlashX}{164mm}{/}
@@ -144,8 +155,14 @@
     \foreach \y in {129,135}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
 
     \Band{118mm}{IN-FLIGHT}
-    \Notes{4mm}{50mm}{\innerW}{68mm}{}
-    \foreach \y in {56,62,68,74,80,86,92,98,104,110}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+    \end{scope}
+    \ifdefined\FuelSectionEnabled
+      \Notes{4mm}{50mm}{\innerW}{53mm}{}
+      \foreach \y in {56,62,68,74,80,86,92,98}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+    \else
+      \Notes{4mm}{50mm}{\innerW}{68mm}{}
+      \foreach \y in {56,62,68,74,80,86,92,98,104,110}{\draw[line width=.25pt, color=muted] (5mm,\y mm) -- (\cardW-5mm,\y mm);}
+    \fi
 
     \Band{45mm}{ARRIVAL}
     \Field{4mm}{34mm}{\arrAtisFreq}{11mm}{ATIS FREQ / CODE}

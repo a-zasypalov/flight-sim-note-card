@@ -3,6 +3,7 @@ import { fetchSimBriefFlightPlan } from "./simbrief.js";
 import { FORMATS, MM_TO_PT } from "./templates.js";
 
 const formatInputs = document.querySelectorAll('input[name="format"]');
+const fuelSwitch = document.querySelector("#fuel-section");
 const input = document.querySelector("#logo-input");
 const dropZone = document.querySelector("#drop-zone");
 const picker = document.querySelector("#pick-logo");
@@ -31,7 +32,7 @@ const simbriefChange = document.querySelector("#simbrief-change");
 const simbriefError = document.querySelector("#simbrief-error");
 const themeToggles = document.querySelectorAll(".theme-toggle button");
 const systemTheme = matchMedia("(prefers-color-scheme: dark)");
-const state = { format: "a4", logo: null, url: null, plans: [null, null] };
+const state = { format: "a4", fuel: false, logo: null, url: null, plans: [null, null] };
 const SIMBRIEF_USERNAME_KEY = "pilot-notes-simbrief-username";
 let activePlan = 0;
 let simbriefPlan;
@@ -57,10 +58,11 @@ function setTheme(mode, save = false) {
 function updatePreview(format) {
   const paper = previewPapers[format];
   const spec = FORMATS[format];
+  const variant = state.fuel ? spec.fuel : spec;
   const image = paper.querySelector(".preview-image");
   const logos = paper.querySelector(".preview-logos");
   const values = paper.querySelector(".preview-values");
-  if (image.getAttribute("src") !== spec.preview) image.src = spec.preview;
+  if (image.getAttribute("src") !== variant.preview) image.src = variant.preview;
   logos.replaceChildren(...spec.logoBoxes.map((box) => {
     const logo = new Image();
     logo.className = "preview-logo";
@@ -71,7 +73,7 @@ function updatePreview(format) {
     logo.style.height = `${box.height / spec.page[1] * 100}%`;
     return logo;
   }));
-  values.replaceChildren(...spec.cards.flatMap((card, index) => Object.entries(card.valueBoxes).flatMap(([key, box]) => {
+  values.replaceChildren(...variant.cards.flatMap((card, index) => Object.entries(card.valueBoxes).flatMap(([key, box]) => {
     const text = state.plans[index]?.[key];
     if (!text) return [];
     const value = document.createElement("span");
@@ -89,7 +91,7 @@ function updatePreview(format) {
 function updatePreviews() {
   updatePreview("a4");
   updatePreview("a5");
-  previewLabel.textContent = FORMATS[state.format].label;
+  previewLabel.textContent = `${FORMATS[state.format].label}${state.fuel ? " · Fuel / weight" : ""}`;
 }
 
 function reducedMotion() {
@@ -374,7 +376,8 @@ async function logoPng() {
 
 async function buildPdf() {
   const format = FORMATS[state.format];
-  const response = await fetch(format.template);
+  const variant = state.fuel ? format.fuel : format;
+  const response = await fetch(variant.template);
   if (!response.ok) throw new Error("Template could not be loaded");
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
   const pdf = await PDFDocument.load(await response.arrayBuffer());
@@ -389,7 +392,7 @@ async function buildPdf() {
     }));
   }
   const font = await pdf.embedFont(StandardFonts.Courier);
-  format.cards.forEach((card, index) => Object.entries(card.valueBoxes).forEach(([key, box]) => {
+  variant.cards.forEach((card, index) => Object.entries(card.valueBoxes).forEach(([key, box]) => {
     const text = state.plans[index]?.[key];
     if (!text) return;
     const boxWidth = box.width * MM_TO_PT;
@@ -401,7 +404,7 @@ async function buildPdf() {
   const url = URL.createObjectURL(new Blob([await pdf.save()], { type: "application/pdf" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = format.filename;
+  link.download = variant.filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url));
 }
@@ -415,11 +418,16 @@ formatInputs.forEach((element) => element.addEventListener("change", () => {
   clearPreviewTransition(previousFormat);
   state.format = element.value;
   syncFlightSlots();
-  previewLabel.textContent = FORMATS[state.format].label;
+  previewLabel.textContent = `${FORMATS[state.format].label}${state.fuel ? " · Fuel / weight" : ""}`;
   animateControls(previousHeight);
   animateControlLayout(previousLayout);
   animatePreview(previousFormat);
 }));
+
+fuelSwitch.addEventListener("change", () => {
+  state.fuel = fuelSwitch.checked;
+  updatePreviews();
+});
 
 themeToggles.forEach((button) => button.addEventListener("click", () => setTheme(button.dataset.themeMode, true)));
 systemTheme.addEventListener("change", () => {
