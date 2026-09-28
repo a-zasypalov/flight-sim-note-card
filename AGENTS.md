@@ -2,11 +2,11 @@
 
 ## Structure
 
-- `latex/` is the canonical blank-card design. `vatsim-flight-card-layout.tex` is the shared layout; the A4 and A5 files prepare its final pages.
+- `latex/` is the canonical blank-card design. `vatsim-flight-card-layout.tex` is shared by the original and optional fuel/weight cards; separate A4 and A5 entry files prepare each variant.
 - `web/` is a static, browser-only Vite app. It adds user logos and imported ICAO FPL values to the generated vector PDFs locally.
 - `ios/` is the native SwiftUI document app for iPhone and iPad. Editable notes are `.pilotnote` packages whose manifests tie content to a stable layout ID and revision.
 - `ios/Pilot Notes/Layouts/` contains versioned PDF backgrounds and their card-local geometry manifests. Published revisions are immutable because notes retain their layout ID and revision.
-- `web/public/templates/` contains generated, tracked PDFs and preview PNGs. Do not edit these files by hand.
+- `web/public/templates/` contains generated, tracked PDFs and preview PNGs for both card variants in A4 and A5. Do not edit these files by hand.
 - `web/templates.js` must stay aligned with the LaTeX card geometry because it places web preview and PDF overlays.
 
 ## Workflow
